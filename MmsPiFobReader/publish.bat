@@ -1,5 +1,5 @@
-"D:\PuTTY\plink.exe" -i "V:\Data\File Vault\Dan PC.ppk" root@192.168.86.152 systemctl stop MmsPiFobReader
+"C:\Program Files\PuTTY\plink.exe" -i "..\MmsPiFobReader Private.ppk" root@10.1.4.135 systemctl stop MmsPiFobReader
 del /Q /S bin\Release\publish
 dotnet publish -c Release -o bin\Release\publish
-"D:\PuTTY\pscp.exe" -batch -r -i "V:\Data\File Vault\Dan PC.ppk" "bin\Release\publish\*" root@192.168.86.152:/opt/MmsPiFobReader/
-"D:\PuTTY\plink.exe" -i "V:\Data\File Vault\Dan PC.ppk" root@192.168.86.152 systemctl start MmsPiFobReader
+"C:\Program Files\PuTTY\pscp.exe" -batch -r -i "..\MmsPiFobReader Private.ppk" "bin\Release\publish\*" root@10.1.4.135:/opt/MmsPiFobReader/
+"C:\Program Files\PuTTY\plink.exe" -i "..\MmsPiFobReader Private.ppk" root@10.1.4.135 systemctl start MmsPiFobReader
