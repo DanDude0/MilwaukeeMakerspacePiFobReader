@@ -113,8 +113,8 @@ namespace MmsPiFobReader
                 // We're not logged in
                 if (seconds <= 0)
                 {
-                    WiringPi.digitalWrite(26, 0);
-                    WiringPi.digitalWrite(27, 0);
+                    WiringPi.digitalWrite(26, 1);
+                    WiringPi.digitalWrite(27, 1);
 
                     // Transition from logged in state.
                     if (user != null)
@@ -134,8 +134,8 @@ namespace MmsPiFobReader
                 // We're Logged in
                 else
                 {
-                    WiringPi.digitalWrite(26, 1);
-                    WiringPi.digitalWrite(27, 1);
+                    WiringPi.digitalWrite(26, 0);
+                    WiringPi.digitalWrite(27, 0);
 
                     if (!clear && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
                     {
