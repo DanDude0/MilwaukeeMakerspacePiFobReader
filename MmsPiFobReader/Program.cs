@@ -36,10 +36,6 @@ namespace MmsPiFobReader
 
         static void Main(string[] args)
         {
-            ReadW26.Initalize();
-            WiringPi.pinMode(26, 1);
-            WiringPi.pinMode(27, 1);
-
             try
             {
                 id = int.Parse(File.ReadAllText("readerid.txt"));
@@ -88,6 +84,7 @@ namespace MmsPiFobReader
             var lastEntry = DateTime.MinValue;
             var seconds = -1;
             var clear = false;
+            ReaderHardware.Logout();
 
             // Main activity loop
             while (true)
@@ -97,13 +94,14 @@ namespace MmsPiFobReader
 
                 if (newSeconds > -5 && newSeconds != seconds)
                 {
+                    ReaderHardware.Warn(newSeconds);
                     DrawStatus(newSeconds);
                 }
 
                 seconds = newSeconds;
 
                 // This blocks for 5ms waiting for user input
-                var input = ReadW26.Read();
+                var input = ReaderHardware.Read();
 
                 if (!string.IsNullOrEmpty(input))
                 {
@@ -113,15 +111,13 @@ namespace MmsPiFobReader
                 // We're not logged in
                 if (seconds <= 0)
                 {
-                    WiringPi.digitalWrite(26, 1);
-                    WiringPi.digitalWrite(27, 1);
-
                     // Transition from logged in state.
                     if (user != null)
                     {
                         DrawStatus(seconds);
                         clear = false;
                         user = null;
+                        ReaderHardware.Logout();
                     }
 
                     if (!clear && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
@@ -134,9 +130,6 @@ namespace MmsPiFobReader
                 // We're Logged in
                 else
                 {
-                    WiringPi.digitalWrite(26, 0);
-                    WiringPi.digitalWrite(27, 0);
-
                     if (!clear && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
                     {
                         DrawUser();
@@ -211,6 +204,7 @@ namespace MmsPiFobReader
 
                 DrawStatus(reader.Timeout, false);
                 DrawUser();
+                ReaderHardware.Login();
             }
         }
 
