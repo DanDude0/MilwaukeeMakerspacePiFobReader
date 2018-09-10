@@ -108,6 +108,7 @@ namespace MmsPiFobReader
                     clear = false;
                     lastEntry = DateTime.Now;
                 }
+
                 // We're not logged in
                 if (seconds <= 0)
                 {
