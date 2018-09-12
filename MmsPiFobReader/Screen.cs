@@ -4,7 +4,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Threading;
+#if RPI
+#else
 using SDL2;
+#endif
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;

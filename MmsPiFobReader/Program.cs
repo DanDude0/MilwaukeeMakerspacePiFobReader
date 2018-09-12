@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using SixLabors.Fonts;
@@ -33,57 +34,15 @@ namespace MmsPiFobReader
         static DateTime expiration = DateTime.MinValue;
         static AuthenticationResult user;
         static ReaderResult reader;
+        static bool clear;
 
         static void Main(string[] args)
         {
-            try
-            {
-                id = int.Parse(File.ReadAllText("readerid.txt"));
-            }
-            catch
-            {
-                DrawFatal("Reader ID is not set");
+            Connect();
 
-                return;
-            }
-
-            try
-            {
-                server = new MilwaukeeMakerspaceApiClient();
-            }
-            catch
-            {
-                DrawFatal("Cannot reach server");
-
-                return;
-            }
-
-            try
-            {
-                reader = server.ReaderLookup(id);
-            }
-            catch
-            {
-                DrawFatal("Server does not recognise reader ID");
-
-                return;
-            }
-
-            DrawHeading(reader.Name);
-            DrawStatus(-1);
-
-            if (reader.Enabled)
-            {
-                DrawPrompt("Enter PIN or swipe fob");
-            }
-            else
-            {
-                DrawPrompt("Login has been disabled");
-            }
             var userEntryBuffer = "";
             var lastEntry = DateTime.MinValue;
             var seconds = -1;
-            var clear = false;
             ReaderHardware.Logout();
 
             // Main activity loop
@@ -165,6 +124,66 @@ namespace MmsPiFobReader
             }
         }
 
+        static void Connect()
+        {
+            id = 0;
+
+            while (id == 0)
+            {
+                try
+                {
+                    id = int.Parse(File.ReadAllText("readerid.txt"));
+                    server = null;
+                }
+                catch
+                {
+                    DrawFatal("Reader ID is not set");
+
+                    Thread.Sleep(1000);
+                }
+            }
+
+            while (server == null)
+            {
+                try
+                {
+                    server = new MilwaukeeMakerspaceApiClient();
+                    reader = null;
+                }
+                catch
+                {
+                    DrawFatal("Cannot reach server");
+
+                    Thread.Sleep(1000);
+                }
+            }
+
+            while (reader == null)
+            {
+                try
+                {
+                    reader = server.ReaderLookup(id);
+                }
+                catch
+                {
+                    DrawFatal("Server does not recognise reader ID");
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            clear = true;
+            DrawHeading(reader.Name);
+            DrawStatus(-1);
+
+            if (user != null)
+                DrawUser();
+            else if (reader.Enabled)
+                DrawPrompt("Enter PIN or swipe fob");
+            else
+                DrawPrompt("Login has been disabled");
+        }
+
         static void Authenticate(string key)
         {
             // Force Logout
@@ -186,9 +205,17 @@ namespace MmsPiFobReader
                 {
                     newUser = server.Authenticate(id, key);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    DrawPrompt("Invalid key");
+                    switch (ex.InnerException)
+                    {
+                        case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
+                            DrawPrompt("Invalid key");
+                            break;
+                        default:
+                            Connect();
+                            break;
+                    }
 
                     return;
                 }
