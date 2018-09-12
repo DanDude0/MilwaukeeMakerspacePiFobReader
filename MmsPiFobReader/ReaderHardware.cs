@@ -26,7 +26,7 @@ namespace MmsPiFobReader
 #else
 			SDL2.SDL.SDL_PollEvent(out var pollEvent);
 
-			if (pollEvent.type == SDL2.SDL.SDL_EventType.SDL_KEYDOWN)
+			if (pollEvent.type == SDL.SDL_EventType.SDL_KEYDOWN)
 			{
 				var keycode = pollEvent.key.keysym.sym;
 
@@ -49,6 +49,12 @@ namespace MmsPiFobReader
 				// Numerals
 				if (character > 47 && character < 58)
 					return character.ToString();
+			}
+			else if (pollEvent.type == SDL.SDL_EventType.SDL_WINDOWEVENT)
+			{
+				if (pollEvent.window.windowEvent == 
+					SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
+					Environment.Exit(0);
 			}
 
 			return "";
