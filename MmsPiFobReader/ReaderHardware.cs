@@ -24,6 +24,8 @@ namespace MmsPiFobReader
 #if RPI
 			return ReadW26.Read();
 #else
+			Thread.Sleep(5);
+
 			SDL2.SDL.SDL_PollEvent(out var pollEvent);
 
 			if (pollEvent.type == SDL.SDL_EventType.SDL_KEYDOWN)
