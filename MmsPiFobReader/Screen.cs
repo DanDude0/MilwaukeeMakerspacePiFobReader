@@ -100,6 +100,7 @@ namespace MmsPiFobReader
 
 			SDL.SDL_BlitSurface(bitmapSurface, IntPtr.Zero, windowSurface, IntPtr.Zero);
 			SDL.SDL_FreeSurface(bitmapSurface);
+			handle.Free();
 			SDL.SDL_UpdateWindowSurface(window);
 #endif
 		}

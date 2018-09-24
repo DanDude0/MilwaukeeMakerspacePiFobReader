@@ -12,7 +12,7 @@ namespace MmsPiFobReader
         {
             client = new HttpClient();
             client.BaseAddress = new Uri("http://10.1.1.15/");
-            client.Timeout = new TimeSpan(0, 0, 5);
+            client.Timeout = new TimeSpan(0, 0, 1);
 
             var unused = client.GetStringAsync($"/").Result;
         }
