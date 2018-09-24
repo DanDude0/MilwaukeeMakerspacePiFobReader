@@ -24,6 +24,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="LiberationSans-Regular.ttf">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
 		<None Update="mms150x170.png">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>

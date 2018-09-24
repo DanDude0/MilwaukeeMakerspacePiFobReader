@@ -16,10 +16,11 @@ namespace MmsPiFobReader
 	class Program
 	{
 		static Screen screen = new Screen();
-		static Font hugeFont = new Font(SystemFonts.Find("Arial"), 100f, FontStyle.Regular);
-		static Font bigFont = new Font(SystemFonts.Find("Arial"), 54f, FontStyle.Regular);
-		static Font littleFont = new Font(SystemFonts.Find("Arial"), 40f, FontStyle.Regular);
-		static Font tinyFont = new Font(SystemFonts.Find("Arial"), 27f, FontStyle.Regular);
+		static FontFamily arial = new FontCollection().Install("LiberationSans-Regular.ttf");
+		static Font hugeFont = new Font(arial, 100f, FontStyle.Regular);
+		static Font bigFont = new Font(arial, 54f, FontStyle.Regular);
+		static Font littleFont = new Font(arial, 40f, FontStyle.Regular);
+		static Font tinyFont = new Font(arial, 27f, FontStyle.Regular);
 		static Bgr565 black = new Bgr565(0, 0, 0);
 		static Bgr565 white = new Bgr565(1, 1, 1);
 		static Bgr565 red = new Bgr565(1, 0.1f, 0.1f);
