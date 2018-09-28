@@ -12,7 +12,7 @@ namespace MmsPiFobReader
 
 		public MilwaukeeMakerspaceApiClient()
         {
-			var host = SearchForServer().Result;
+            var host = "10.1.1.15"; //SearchForServer().Result;
 
             client = new HttpClient();
             client.BaseAddress = new Uri($"http://{host}/");
@@ -39,7 +39,7 @@ namespace MmsPiFobReader
 		{
 			using (var deviceLocator = new SsdpDeviceLocator())
 			{
-				var foundDevices = await deviceLocator.SearchAsync("uuid:6111f321-2cee-455e-b203-4abfaf14b516", new TimeSpan(0, 0, 5));
+				var foundDevices = await deviceLocator.SearchAsync("uuid:6111f321-2cee-455e-b203-4abfaf14b516", new TimeSpan(0, 0, 15));
 
 				foreach (var foundDevice in foundDevices)
 				{

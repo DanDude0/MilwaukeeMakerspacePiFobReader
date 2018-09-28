@@ -12,14 +12,16 @@ namespace MmsPiFobReader
 		{
 #if RPI
             ReadW26.Initalize();
-            WiringPi.pinMode(24, 1); // LED
-            WiringPi.pinMode(25, 1); // Beeper
-            WiringPi.pinMode(26, 1); // Equipment Trigger
-            WiringPi.pinMode(27, 1); // Equipment Trigger
+            WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable
+            WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable
+            WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable
+            WiringPi.pinMode(25, 1); // Equipment Trigger, Logged in disable
+            WiringPi.pinMode(26, 1); // LED 
+            WiringPi.pinMode(27, 1); // Beeper 
 #endif
-		}
+        }
 
-		public static string Read()
+        public static string Read()
 		{
 #if RPI
 			return ReadW26.Read();
@@ -66,14 +68,16 @@ namespace MmsPiFobReader
 		public static void Login()
 		{
 #if RPI
-			WiringPi.digitalWrite(24, 1);
+			WiringPi.digitalWrite(22, 1);
+			WiringPi.digitalWrite(23, 1);
+			WiringPi.digitalWrite(24, 0);
 			WiringPi.digitalWrite(25, 0);
-			WiringPi.digitalWrite(26, 0);
+			WiringPi.digitalWrite(26, 1);
 			WiringPi.digitalWrite(27, 0);
 #endif
-		}
+        }
 
-		public static void Logout()
+        public static void Logout()
 		{
 #if RPI
 			if (warningThread != null)
@@ -81,16 +85,18 @@ namespace MmsPiFobReader
 
 			WiringPi.digitalWrite(24, 0);
 			WiringPi.digitalWrite(25, 0);
-			WiringPi.digitalWrite(26, 1);
-			WiringPi.digitalWrite(27, 1);
+			WiringPi.digitalWrite(24, 1);
+			WiringPi.digitalWrite(25, 1);
+			WiringPi.digitalWrite(26, 0);
+			WiringPi.digitalWrite(27, 0);
 #endif
-		}
+        }
 
-		public static void Warn(int seconds)
+        public static void Warn(int seconds)
 		{
 #if RPI
 			if (seconds < 60 && seconds > 1)
-				WiringPi.digitalWrite(24, seconds % 2);
+				WiringPi.digitalWrite(26, seconds % 2);
 
 			if (seconds > 45 || seconds < 1)
 				return;
@@ -112,11 +118,11 @@ namespace MmsPiFobReader
 
 		private static void WarnThread()
 		{
-			WiringPi.digitalWrite(25, 1);
+			WiringPi.digitalWrite(27, 1);
 
 			Thread.Sleep(WarningLength);
 
-			WiringPi.digitalWrite(25, 0);
+			WiringPi.digitalWrite(27, 0);
 		}
 #endif
 	}
