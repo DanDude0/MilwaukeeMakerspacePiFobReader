@@ -100,7 +100,17 @@ If you elected to install Visual Studio you can just open the `MmsPiFobReader.sl
 
 ## I want to setup an actual hardware reader
 
-TODO: Document Everything
+### Parts List ###
+
+There is a spreadsheet here containing parts, quantities, prices, and links to parts for purchase
+https://docs.google.com/spreadsheets/d/1saBPHnn_E8FyzVhVKWeM24Enc3zIGl8CUS3w7r8rCs0/edit?usp=sharing
+
+### Custom Circuit Board ###
+
+This is the schematic and layout for an interface board to go link the various hardware components
+https://easyeda.com/Dan_Dude/Pi-Fob-Reader
+
+TODO: Document Everything Else
 
 ## I want to develop on a desktop machine, and deploy to a reader easily
 

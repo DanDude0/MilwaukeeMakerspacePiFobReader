@@ -9,59 +9,61 @@ using Rssdp;
 
 namespace MmsPiFobReader
 {
-    class MilwaukeeMakerspaceApiClient
-    {
-        HttpClient client;
+	class MilwaukeeMakerspaceApiClient
+	{
+		HttpClient client;
 
 		public MilwaukeeMakerspaceApiClient()
-        {
+		{
 			var host = SearchForServer().Result;
 
-            client = new HttpClient();
-            client.BaseAddress = new Uri($"http://{host}/");
-            client.Timeout = new TimeSpan(0, 0, 1);
+			client = new HttpClient();
+			client.BaseAddress = new Uri($"http://{host}/");
+			client.Timeout = new TimeSpan(0, 0, 1);
 
-            var unused = client.GetStringAsync($"/").Result;
-        }
+			var unused = client.GetStringAsync($"/").Result;
+		}
 
-        public ReaderResult ReaderLookup(int id)
-        {
-            var result = client.GetStringAsync($"reader/lookup/{id}").Result;
+		public ReaderResult ReaderLookup(int id)
+		{
+			var result = client.GetStringAsync($"reader/lookup/{id}").Result;
 
-            return JsonConvert.DeserializeObject<ReaderResult>(result);
-        }
+			return JsonConvert.DeserializeObject<ReaderResult>(result);
+		}
 
-        public AuthenticationResult Authenticate(int id, string key)
-        {
-            var result = client.GetStringAsync($"authenticate/json/{id}/{key}").Result;
+		public AuthenticationResult Authenticate(int id, string key)
+		{
+			var result = client.GetStringAsync($"authenticate/json/{id}/{key}").Result;
 
-            return JsonConvert.DeserializeObject<AuthenticationResult>(result);
-        }
+			return JsonConvert.DeserializeObject<AuthenticationResult>(result);
+		}
 
-		private SsdpDeviceLocator deviceLocator = null;
 		private string hostname = null;
 
 		private async Task<string> SearchForServer()
 		{
 			var ip4 = GetLocalIp4Address();
+			SsdpDeviceLocator deviceLocator = null;
 
-			try{
+			try
+			{
 				deviceLocator = new SsdpDeviceLocator(ip4);
 				deviceLocator.StartListeningForNotifications();
 				deviceLocator.DeviceAvailable += FoundDevice;
-				var task = deviceLocator.SearchAsync(new TimeSpan(0, 0, 10));
+				var task = deviceLocator.SearchAsync("uuid:6111f321-2cee-455e-b203-4abfaf14b516", new TimeSpan(0, 0, 2));
 
-				while (deviceLocator.IsSearching) {
+				for (int i = 0; i < 20; i += 1)
+				{
 					if (hostname != null)
 						return hostname;
 
 					await Task.Delay(500);
 				}
-
 			}
 			finally
 			{
-				deviceLocator.StopListeningForNotifications();
+				deviceLocator?.StopListeningForNotifications();
+				deviceLocator?.Dispose();
 			}
 
 			throw new Exception("Could not locate server");

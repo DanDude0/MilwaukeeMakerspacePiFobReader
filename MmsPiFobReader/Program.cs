@@ -4,38 +4,17 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 
 namespace MmsPiFobReader
 {
 	class Program
 	{
-		static Screen screen = new Screen();
-		static FontFamily arial = new FontCollection().Install("LiberationSans-Regular.ttf");
-		static Font hugeFont = new Font(arial, 100f, FontStyle.Regular);
-		static Font bigFont = new Font(arial, 54f, FontStyle.Regular);
-		static Font littleFont = new Font(arial, 40f, FontStyle.Regular);
-		static Font tinyFont = new Font(arial, 27f, FontStyle.Regular);
-		static Bgr565 black = new Bgr565(0, 0, 0);
-		static Bgr565 white = new Bgr565(1, 1, 1);
-		static Bgr565 red = new Bgr565(1, 0.1f, 0.1f);
-		static Bgr565 green = new Bgr565(0.1f, 1, 0.1f);
-		static Bgr565 blue = new Bgr565(0.3f, 0.3f, 1);
-		static Bgr565 grey = new Bgr565(0.5f, 0.5f, 0.5f);
-		static Image<Bgr565> logo200 = Image.Load<Bgr565>("mms200x226.png");
-		static Image<Bgr565> logo150 = Image.Load<Bgr565>("mms150x170.png");
-
 		static MilwaukeeMakerspaceApiClient server;
 		static int id;
 		static DateTime expiration = DateTime.MinValue;
 		static AuthenticationResult user;
 		static ReaderResult reader;
-		static bool clear;
+		static bool inputCleared;
 
 		// With all due respect to Sim City!
 		static string[] loadingMessages =
@@ -150,12 +129,13 @@ namespace MmsPiFobReader
 
 		static void Main(string[] args)
 		{
-			Connect();
-
+			Draw.Loading("");
+			ReaderHardware.Logout();
 			var userEntryBuffer = "";
 			var lastEntry = DateTime.MinValue;
 			var seconds = -1;
-			ReaderHardware.Logout();
+
+			Connect();
 
 			// Main activity loop
 			while (true)
@@ -166,7 +146,7 @@ namespace MmsPiFobReader
 				if (newSeconds > -5 && newSeconds != seconds)
 				{
 					ReaderHardware.Warn(newSeconds);
-					DrawStatus(newSeconds);
+					Draw.Status(newSeconds);
 				}
 
 				seconds = newSeconds;
@@ -176,7 +156,7 @@ namespace MmsPiFobReader
 
 				if (!string.IsNullOrEmpty(input))
 				{
-					clear = false;
+					inputCleared = false;
 					lastEntry = DateTime.Now;
 				}
 
@@ -185,34 +165,29 @@ namespace MmsPiFobReader
 				{
 					// Transition from logged in state.
 					if (user != null)
-					{
-						DrawStatus(seconds);
-						clear = false;
-						user = null;
-						ReaderHardware.Logout();
-					}
+						Logout();
 
-					if (!clear && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
+					if (!inputCleared && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
 					{
-						DrawPrompt("Enter PIN or swipe fob");
+						Draw.Prompt("Enter PIN or swipe fob");
 						userEntryBuffer = "";
-						clear = true;
+						inputCleared = true;
 					}
 				}
 				// We're Logged in
 				else
 				{
-					if (!clear && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
+					if (!inputCleared && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
 					{
-						DrawUser();
+						Draw.User(user);
 						userEntryBuffer = "";
-						clear = true;
+						inputCleared = true;
 					}
 				}
 
 				if (input.Length == 8)
 				{
-					Authenticate($"W26#{input}");
+					ProcessCommand($"W26#{input}");
 					userEntryBuffer = "";
 				}
 				else if (input.Length == 1)
@@ -220,16 +195,16 @@ namespace MmsPiFobReader
 					switch (input[0])
 					{
 						case '*':
-							DrawPrompt("Enter PIN or swipe fob");
+							Draw.Prompt("Enter PIN or swipe fob");
 							userEntryBuffer = "";
 							break;
 						case '#':
-							Authenticate($"{userEntryBuffer}#");
+							ProcessCommand($"{userEntryBuffer}#");
 							userEntryBuffer = "";
 							break;
 						default:
 							userEntryBuffer += input[0];
-							DrawEntry("".PadLeft(userEntryBuffer.Length, '*'));
+							Draw.Entry("".PadLeft(userEntryBuffer.Length, '*'));
 							break;
 					}
 				}
@@ -250,23 +225,27 @@ namespace MmsPiFobReader
 			while (reader == null)
 				ReaderHardware.Read();
 
-			clear = true;
-			DrawHeading(reader.Name);
-			DrawStatus(-1);
+			inputCleared = true;
+			Draw.Heading(reader.Name);
+			Draw.Status(-1, false);
 
 			if (user != null)
-				DrawUser();
+				Draw.User(user);
 			else if (reader.Enabled)
-				DrawPrompt("Enter PIN or swipe fob");
+				Draw.Prompt("Enter PIN or swipe fob");
 			else
-				DrawPrompt("Login has been disabled");
+				Draw.Prompt("Login has been disabled");
 		}
 
 		static void ConnectThread()
 		{
 			while (true)
 			{
-				DrawLoading();
+				var random = new Random();
+
+				var message = loadingMessages[random.Next(loadingMessages.Length - 1)];
+
+				Draw.Loading(message);
 
 				try
 				{
@@ -274,7 +253,7 @@ namespace MmsPiFobReader
 				}
 				catch
 				{
-					DrawFatal("Reader ID is not set");
+					Draw.Fatal("Reader ID is not set");
 				}
 
 				try
@@ -284,7 +263,7 @@ namespace MmsPiFobReader
 				}
 				catch
 				{
-					DrawFatal("Cannot reach server");
+					Draw.Fatal("Cannot reach server");
 				}
 
 				try
@@ -299,40 +278,39 @@ namespace MmsPiFobReader
 				}
 				catch
 				{
-					DrawFatal("Server does not recognise reader ID");
+					Draw.Fatal("Server does not recognise reader ID");
 				}
 
 				Thread.Sleep(2000);
 			}
 		}
 
-		static void Authenticate(string key)
+		static void ProcessCommand(string command)
 		{
 			// Force Logout
-			if (key == "0#")
+			if (command == "0#")
 			{
 				expiration = DateTime.Now - new TimeSpan(0, 0, 1);
 
-				DrawStatus(-1, false);
-				DrawPrompt("Enter PIN or swipe fob");
+				Logout();
 			}
 			// Login / Extend
 			else
 			{
-				DrawPrompt("Authenticating. . .");
+				Draw.Prompt("Authenticating. . .");
 
 				AuthenticationResult newUser;
 
 				try
 				{
-					newUser = server.Authenticate(id, key);
+					newUser = server.Authenticate(id, command);
 				}
 				catch (Exception ex)
 				{
 					switch (ex.InnerException)
 					{
 						case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
-							DrawPrompt("Invalid key");
+							Draw.Prompt("Invalid key");
 							break;
 						default:
 							Connect();
@@ -344,209 +322,32 @@ namespace MmsPiFobReader
 
 				if (!newUser.AccessGranted)
 				{
-					DrawPrompt("Expired membership");
+					Draw.Prompt("Expired membership");
 
 					return;
 				}
 
-				user = newUser;
-				expiration = DateTime.Now + new TimeSpan(0, 0, reader.Timeout);
-
-				DrawStatus(reader.Timeout, false);
-				DrawUser();
-				ReaderHardware.Login();
+				Login(newUser);
 			}
 		}
 
-		static void DrawLoading()
+		static void Login(AuthenticationResult newUser)
 		{
-			var random = new Random();
-
-			var message = loadingMessages[random.Next(loadingMessages.Length - 1)];
-
-			screen.Mutate(s => s
-				.Fill(black)
-				.DrawPolygon(
-					grey,
-					10,
-					new PointF(0, 0),
-					new PointF(480, 0),
-					new PointF(480, 319),
-					new PointF(0, 319)
-				)
-				.DrawText(new TextGraphicsOptions
-				{
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 20,
-					VerticalAlignment = VerticalAlignment.Center,
-				},
-					message,
-					bigFont,
-					white,
-					new PointF(10, 160)
-					)
-				);
+			inputCleared = true;
+			expiration = DateTime.Now + new TimeSpan(0, 0, reader.Timeout);
+			user = newUser;
+			Draw.Status(reader.Timeout, false);
+			Draw.User(user);
+			ReaderHardware.Login();
 		}
 
-		static void DrawHeading(string name)
+		static void Logout()
 		{
-			screen.Mutate(s => s
-				.Fill(black)
-				.DrawImage(logo150, 1, new Point(0, 0))
-				.DrawText(new TextGraphicsOptions
-				{
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 160,
-					VerticalAlignment = VerticalAlignment.Top,
-				},
-					name,
-					littleFont,
-					red,
-					new PointF(160, 0)
-				)
-				.DrawPolygon(
-					grey,
-					2,
-					new PointF(0, 210),
-					new PointF(480, 210),
-					new PointF(480, 319),
-					new PointF(0, 319)
-				)
-			);
-		}
-
-		static void DrawStatus(int seconds, bool draw = true)
-		{
-			Bgr565 color;
-			Bgr565 bg;
-			Font font;
-			string text;
-
-			if (seconds > 60)
-			{
-				color = green;
-				bg = black;
-				font = littleFont;
-				text = $"Logged In\n{seconds / 60}m Remaining";
-			}
-			else if (seconds > 0)
-			{
-				if (seconds % 2 == 0)
-				{
-					color = red;
-					bg = black;
-				}
-				else
-				{
-					color = black;
-					bg = red;
-				}
-
-				font = littleFont;
-				text = $"Logging Out!\n{seconds}s Remaining";
-			}
-			else
-			{
-				color = blue;
-				bg = black;
-				font = bigFont;
-				text = "Logged Out";
-			}
-
-			screen.Mutate(s => s
-				.Fill(bg, new RectangleF(159, 88, 480 - 159, 110))
-				.DrawText(new TextGraphicsOptions
-				{
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 160,
-					VerticalAlignment = VerticalAlignment.Center,
-				},
-					text,
-					font,
-					color,
-					new PointF(160, 143)
-					),
-				draw);
-		}
-
-		static void DrawUser()
-		{
-			screen.Mutate(s => s
-				.Fill(black, new RectangleF(5, 215, 470, 100))
-				.DrawText(new TextGraphicsOptions
-				{
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 12,
-					VerticalAlignment = VerticalAlignment.Center,
-				},
-					$"Hello, {user.Name}!\nRenewal due: {user.Expiration.ToString($"yyyy-MM-dd")}\nLogin to extend timer, '0#' to logout",
-					tinyFont,
-					white,
-					new PointF(6, 265)
-					)
-				);
-		}
-
-		static void DrawPrompt(string contents)
-		{
-			screen.Mutate(s => s
-				.Fill(black, new RectangleF(5, 215, 470, 100))
-				.DrawText(new TextGraphicsOptions
-				{
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 12,
-					VerticalAlignment = VerticalAlignment.Center,
-				},
-					contents,
-					littleFont,
-					white,
-					new PointF(6, 265)
-					)
-				);
-		}
-
-		static void DrawEntry(string contents)
-		{
-			screen.Mutate(s => s
-				.Fill(black, new RectangleF(5, 215, 470, 100))
-				.DrawText(new TextGraphicsOptions
-				{
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 12,
-					VerticalAlignment = VerticalAlignment.Top,
-				},
-					contents,
-					hugeFont,
-					white,
-					new PointF(6, 248)
-					)
-				);
-		}
-
-		static void DrawFatal(string contents)
-		{
-			screen.Mutate(s => s
-				.Fill(black)
-				.DrawPolygon(
-					red,
-					10,
-					new PointF(0, 0),
-					new PointF(480, 0),
-					new PointF(480, 319),
-					new PointF(0, 319)
-				)
-				.DrawText(new TextGraphicsOptions
-				{
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 20,
-					VerticalAlignment = VerticalAlignment.Center,
-				},
-					$"! ERROR !\n{contents}",
-					bigFont,
-					red,
-					new PointF(10, 160)
-					)
-				);
+			inputCleared = true;
+			user = null;
+			Draw.Status(-1, false);
+			Draw.Prompt("Enter PIN or swipe fob");
+			ReaderHardware.Logout();
 		}
 	}
 }
