@@ -22,7 +22,7 @@ namespace MmsPiFobReader
 		Image<Bgr565> buffer = new Image<Bgr565>(480, 320);
 
 #if RPI
-        FileStream frameBuffer = new FileStream("/dev/fb1", FileMode.Append);
+		FileStream frameBuffer = new FileStream("/dev/fb1", FileMode.Append);
 		byte[] currentFrame;
 		byte[] pendingFrame;
 		object frameLock = new object();
@@ -79,18 +79,16 @@ namespace MmsPiFobReader
 			var bytes = MemoryMarshal.AsBytes(buffer.GetPixelSpan()).ToArray();
 
 #if RPI
-            lock (frameLock)
-            {
-                if (currentFrame == null)
-                    currentFrame = bytes;
-                else
-                {
-                    pendingFrame = bytes;
-                }
-            }
+			lock (frameLock) {
+				if (currentFrame == null)
+					currentFrame = bytes;
+				else {
+					pendingFrame = bytes;
+				}
+			}
 
-            var thread = new Thread(DrawThread);
-            thread.Start();
+			var thread = new Thread(DrawThread);
+			thread.Start();
 #else
 			// This code is seriously bloated and could almost certainly be faster, but it just needs to be good enough for debugging.
 			var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
@@ -106,23 +104,21 @@ namespace MmsPiFobReader
 		}
 
 #if RPI
-        private void DrawThread()
-        {
-            while (true)
-            {
-                frameBuffer.Seek(0, SeekOrigin.Begin);
-                frameBuffer.Write(currentFrame);
+		private void DrawThread()
+		{
+			while (true) {
+				frameBuffer.Seek(0, SeekOrigin.Begin);
+				frameBuffer.Write(currentFrame);
 
-                lock (frameLock)
-                {
-                    currentFrame = pendingFrame;
-                    pendingFrame = null;
+				lock (frameLock) {
+					currentFrame = pendingFrame;
+					pendingFrame = null;
 
-                    if (currentFrame == null)
-                        return;
-                }
-            }
-        }
+					if (currentFrame == null)
+						return;
+				}
+			}
+		}
 #endif
 	}
 }

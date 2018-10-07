@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Threading.Tasks;
+using System.Threading;
 using Newtonsoft.Json;
 using Rssdp;
 
@@ -11,21 +11,20 @@ namespace MmsPiFobReader
 {
 	class MilwaukeeMakerspaceApiClient
 	{
-		HttpClient client;
+		string server;
 
 		public MilwaukeeMakerspaceApiClient()
 		{
-			var host = SearchForServer().Result;
+			SearchForServer();
 
-			client = new HttpClient();
-			client.BaseAddress = new Uri($"http://{host}/");
-			client.Timeout = new TimeSpan(0, 0, 1);
+			var client = GetClient();
 
 			var unused = client.GetStringAsync($"/").Result;
 		}
 
 		public ReaderResult ReaderLookup(int id)
 		{
+			var client = GetClient();
 			var result = client.GetStringAsync($"reader/lookup/{id}").Result;
 
 			return JsonConvert.DeserializeObject<ReaderResult>(result);
@@ -33,35 +32,57 @@ namespace MmsPiFobReader
 
 		public AuthenticationResult Authenticate(int id, string key)
 		{
+			var client = GetClient();
 			var result = client.GetStringAsync($"authenticate/json/{id}/{key}").Result;
 
 			return JsonConvert.DeserializeObject<AuthenticationResult>(result);
 		}
 
-		private string hostname = null;
-
-		private async Task<string> SearchForServer()
+		public void Logout(int id)
 		{
-			var ip4 = GetLocalIp4Address();
+			var client = GetClient();
+
+			client.GetAsync($"authenticate/logout/{id}/").Result.EnsureSuccessStatusCode();
+		}
+
+		private HttpClient GetClient()
+		{
+			var client = new HttpClient();
+			client.BaseAddress = new Uri($"http://{server}/");
+			client.Timeout = new TimeSpan(0, 0, 1);
+
+			return client;
+		}
+
+		private void SearchForServer()
+		{
+			string ip4;
+
+			// Have to bind to all addresses on Linux, or broadcasts don't work!
+			if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)) {
+				ip4 = GetLocalIp4Address();
+			}
+			else {
+				ip4 = IPAddress.Any.ToString();
+			}
+
 			SsdpDeviceLocator deviceLocator = null;
 
-			try
-			{
+			try {
 				deviceLocator = new SsdpDeviceLocator(ip4);
 				deviceLocator.StartListeningForNotifications();
 				deviceLocator.DeviceAvailable += FoundDevice;
-				var task = deviceLocator.SearchAsync("uuid:6111f321-2cee-455e-b203-4abfaf14b516", new TimeSpan(0, 0, 2));
+				var unused = deviceLocator.SearchAsync("uuid:6111f321-2cee-455e-b203-4abfaf14b516", new TimeSpan(0, 0, 2));
 
-				for (int i = 0; i < 20; i += 1)
-				{
-					if (hostname != null)
-						return hostname;
+				for (int i = 0; i < 20; i += 1) {
+					if (!string.IsNullOrEmpty(server))
+						// We found a server, let the constructor continue
+						return;
 
-					await Task.Delay(500);
+					Thread.Sleep(500);
 				}
 			}
-			finally
-			{
+			finally {
 				deviceLocator?.StopListeningForNotifications();
 				deviceLocator?.Dispose();
 			}
@@ -72,15 +93,14 @@ namespace MmsPiFobReader
 		private void FoundDevice(object sender, DeviceAvailableEventArgs e)
 		{
 			if (e.DiscoveredDevice.Usn.Contains("6111f321-2cee-455e-b203-4abfaf14b516"))
-				hostname = e.DiscoveredDevice.DescriptionLocation.Host;
+				server = e.DiscoveredDevice.DescriptionLocation.Host;
 		}
 
 		private static string GetLocalIp4Address()
 		{
 			var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
 
-			foreach (var network in networkInterfaces)
-			{
+			foreach (var network in networkInterfaces) {
 				if (network.OperationalStatus != OperationalStatus.Up)
 					continue;
 
@@ -89,8 +109,7 @@ namespace MmsPiFobReader
 				if (properties.GatewayAddresses.Count == 0)
 					continue;
 
-				foreach (var address in properties.UnicastAddresses)
-				{
+				foreach (var address in properties.UnicastAddresses) {
 					if (address.Address.AddressFamily != AddressFamily.InterNetwork)
 						continue;
 

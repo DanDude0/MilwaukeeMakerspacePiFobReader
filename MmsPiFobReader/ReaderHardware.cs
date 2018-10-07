@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -11,17 +11,17 @@ namespace MmsPiFobReader
 		static ReaderHardware()
 		{
 #if RPI
-            ReadW26.Initalize();
-            WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable
-            WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable
-            WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable
-            WiringPi.pinMode(25, 1); // Equipment Trigger, Logged in disable
-            WiringPi.pinMode(26, 1); // LED 
-            WiringPi.pinMode(27, 1); // Beeper 
+			ReadW26.Initalize();
+			WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable
+			WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable
+			WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable
+			WiringPi.pinMode(25, 1); // Equipment Trigger, Logged in disable
+			WiringPi.pinMode(26, 1); // LED 
+			WiringPi.pinMode(27, 1); // Beeper 
 #endif
-        }
+		}
 
-        public static string Read()
+		public static string Read()
 		{
 #if RPI
 			return ReadW26.Read();
@@ -30,12 +30,10 @@ namespace MmsPiFobReader
 
 			SDL2.SDL.SDL_PollEvent(out var pollEvent);
 
-			if (pollEvent.type == SDL.SDL_EventType.SDL_KEYDOWN)
-			{
+			if (pollEvent.type == SDL.SDL_EventType.SDL_KEYDOWN) {
 				var keycode = pollEvent.key.keysym.sym;
 
-				switch (keycode)
-				{
+				switch (keycode) {
 					case SDL.SDL_Keycode.SDLK_HASH:
 					case SDL.SDL_Keycode.SDLK_RETURN:
 					case SDL.SDL_Keycode.SDLK_RETURN2:
@@ -54,9 +52,8 @@ namespace MmsPiFobReader
 				if (character > 47 && character < 58)
 					return character.ToString();
 			}
-			else if (pollEvent.type == SDL.SDL_EventType.SDL_WINDOWEVENT)
-			{
-				if (pollEvent.window.windowEvent == 
+			else if (pollEvent.type == SDL.SDL_EventType.SDL_WINDOWEVENT) {
+				if (pollEvent.window.windowEvent ==
 					SDL.SDL_WindowEventID.SDL_WINDOWEVENT_CLOSE)
 					Environment.Exit(0);
 			}
@@ -75,9 +72,9 @@ namespace MmsPiFobReader
 			WiringPi.digitalWrite(26, 1);
 			WiringPi.digitalWrite(27, 0);
 #endif
-        }
+		}
 
-        public static void Logout()
+		public static void Logout()
 		{
 #if RPI
 			warningThread?.Join();
@@ -89,9 +86,9 @@ namespace MmsPiFobReader
 			WiringPi.digitalWrite(26, 0);
 			WiringPi.digitalWrite(27, 0);
 #endif
-        }
+		}
 
-        public static void Warn(int seconds)
+		public static void Warn(int seconds)
 		{
 #if RPI
 			if (seconds < 60 && seconds > 1)
@@ -101,8 +98,7 @@ namespace MmsPiFobReader
 				return;
 			else if (seconds > 30)
 				WarningLength = 10;
-			else
-			{
+			else {
 				WarningLength = 510 - (int)(Math.Log(seconds) * 147);
 			}
 

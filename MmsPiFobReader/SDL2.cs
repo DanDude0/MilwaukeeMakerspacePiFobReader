@@ -45,8 +45,7 @@ namespace SDL2
 
 		internal static byte[] UTF8_ToNative(string s)
 		{
-			if (s == null)
-			{
+			if (s == null) {
 				return null;
 			}
 
@@ -56,15 +55,13 @@ namespace SDL2
 
 		internal static unsafe string UTF8_ToManaged(IntPtr s, bool freePtr = false)
 		{
-			if (s == IntPtr.Zero)
-			{
+			if (s == IntPtr.Zero) {
 				return null;
 			}
 
 			/* We get to do strlen ourselves! */
 			byte* ptr = (byte*)s;
-			while (*ptr != 0)
-			{
+			while (*ptr != 0) {
 				ptr++;
 			}
 
@@ -96,8 +93,7 @@ namespace SDL2
 #endif
 
 			/* Some SDL functions will malloc, we have to free! */
-			if (freePtr)
-			{
+			if (freePtr) {
 				SDL_free(s);
 			}
 			return result;
@@ -684,15 +680,13 @@ namespace SDL2
 				out result,
 				out userdata
 			);
-			if (result != IntPtr.Zero)
-			{
+			if (result != IntPtr.Zero) {
 				callback = (SDL_LogOutputFunction)Marshal.GetDelegateForFunctionPointer(
 					result,
 					typeof(SDL_LogOutputFunction)
 				);
 			}
-			else
-			{
+			else {
 				callback = null;
 			}
 		}
@@ -792,8 +786,7 @@ namespace SDL2
 		/* Ripped from Jameson's LpUtf8StrMarshaler */
 		private static IntPtr INTERNAL_AllocUTF8(string str)
 		{
-			if (string.IsNullOrEmpty(str))
-			{
+			if (string.IsNullOrEmpty(str)) {
 				return IntPtr.Zero;
 			}
 			byte[] bytes = System.Text.Encoding.UTF8.GetBytes(str + '\0');
@@ -804,8 +797,7 @@ namespace SDL2
 
 		public static unsafe int SDL_ShowMessageBox([In()] ref SDL_MessageBoxData messageboxdata, out int buttonid)
 		{
-			var data = new INTERNAL_SDL_MessageBoxData()
-			{
+			var data = new INTERNAL_SDL_MessageBoxData() {
 				flags = messageboxdata.flags,
 				window = messageboxdata.window,
 				title = INTERNAL_AllocUTF8(messageboxdata.title),
@@ -814,32 +806,27 @@ namespace SDL2
 			};
 
 			var buttons = new INTERNAL_SDL_MessageBoxButtonData[messageboxdata.numbuttons];
-			for (int i = 0; i < messageboxdata.numbuttons; i++)
-			{
-				buttons[i] = new INTERNAL_SDL_MessageBoxButtonData()
-				{
+			for (int i = 0; i < messageboxdata.numbuttons; i++) {
+				buttons[i] = new INTERNAL_SDL_MessageBoxButtonData() {
 					flags = messageboxdata.buttons[i].flags,
 					buttonid = messageboxdata.buttons[i].buttonid,
 					text = INTERNAL_AllocUTF8(messageboxdata.buttons[i].text),
 				};
 			}
 
-			if (messageboxdata.colorScheme != null)
-			{
+			if (messageboxdata.colorScheme != null) {
 				data.colorScheme = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(SDL_MessageBoxColorScheme)));
 				Marshal.StructureToPtr(messageboxdata.colorScheme.Value, data.colorScheme, false);
 			}
 
 			int result;
-			fixed (INTERNAL_SDL_MessageBoxButtonData* buttonsPtr = &buttons[0])
-			{
+			fixed (INTERNAL_SDL_MessageBoxButtonData* buttonsPtr = &buttons[0]) {
 				data.buttons = (IntPtr)buttonsPtr;
 				result = INTERNAL_SDL_ShowMessageBox(ref data, out buttonid);
 			}
 
 			Marshal.FreeHGlobal(data.colorScheme);
-			for (int i = 0; i < messageboxdata.numbuttons; i++)
-			{
+			for (int i = 0; i < messageboxdata.numbuttons; i++) {
 				SDL_free(buttons[i].text);
 			}
 			SDL_free(data.message);
@@ -2462,12 +2449,10 @@ namespace SDL2
 
 		public static byte SDL_BYTESPERPIXEL(uint X)
 		{
-			if (SDL_ISPIXELFORMAT_FOURCC(X))
-			{
+			if (SDL_ISPIXELFORMAT_FOURCC(X)) {
 				if ((X == SDL_PIXELFORMAT_YUY2) ||
 						(X == SDL_PIXELFORMAT_UYVY) ||
-						(X == SDL_PIXELFORMAT_YVYU))
-				{
+						(X == SDL_PIXELFORMAT_YVYU)) {
 					return 2;
 				}
 				return 1;
@@ -2477,8 +2462,7 @@ namespace SDL2
 
 		public static bool SDL_ISPIXELFORMAT_INDEXED(uint format)
 		{
-			if (SDL_ISPIXELFORMAT_FOURCC(format))
-			{
+			if (SDL_ISPIXELFORMAT_FOURCC(format)) {
 				return false;
 			}
 			SDL_PIXELTYPE_ENUM pType =
@@ -2492,8 +2476,7 @@ namespace SDL2
 
 		public static bool SDL_ISPIXELFORMAT_ALPHA(uint format)
 		{
-			if (SDL_ISPIXELFORMAT_FOURCC(format))
-			{
+			if (SDL_ISPIXELFORMAT_FOURCC(format)) {
 				return false;
 			}
 			SDL_PIXELORDER_ENUM pOrder =
@@ -4071,15 +4054,13 @@ namespace SDL2
 		{
 			IntPtr result = IntPtr.Zero;
 			SDL_bool retval = SDL_GetEventFilter(out result, out userdata);
-			if (result != IntPtr.Zero)
-			{
+			if (result != IntPtr.Zero) {
 				filter = (SDL_EventFilter)Marshal.GetDelegateForFunctionPointer(
 					result,
 					typeof(SDL_EventFilter)
 				);
 			}
-			else
-			{
+			else {
 				filter = null;
 			}
 			return retval;

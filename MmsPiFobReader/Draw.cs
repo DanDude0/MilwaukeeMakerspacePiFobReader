@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
@@ -12,10 +12,11 @@ namespace MmsPiFobReader
 	{
 		private static Screen screen = new Screen();
 		private static FontFamily arial = new FontCollection().Install("LiberationSans-Regular.ttf");
-		private static Font hugeFont = new Font(arial, 100f, FontStyle.Regular);
-		private static Font bigFont = new Font(arial, 54f, FontStyle.Regular);
-		private static Font littleFont = new Font(arial, 40f, FontStyle.Regular);
-		private static Font tinyFont = new Font(arial, 27f, FontStyle.Regular);
+		private static Font hugeFont = new Font(arial, 120f, FontStyle.Regular);
+		private static Font bigFont = new Font(arial, 56f, FontStyle.Regular);
+		private static Font littleFont = new Font(arial, 45f, FontStyle.Regular);
+		private static Font tinyFont = new Font(arial, 31f, FontStyle.Regular);
+		private static Font entFont = new Font(arial, 24f, FontStyle.Regular);
 		private static Bgr565 black = new Bgr565(0, 0, 0);
 		private static Bgr565 white = new Bgr565(1, 1, 1);
 		private static Bgr565 red = new Bgr565(1, 0.1f, 0.1f);
@@ -37,8 +38,7 @@ namespace MmsPiFobReader
 					new PointF(480, 319),
 					new PointF(0, 319)
 				)
-				.DrawText(new TextGraphicsOptions
-				{
+				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 20,
 					VerticalAlignment = VerticalAlignment.Center,
@@ -56,8 +56,7 @@ namespace MmsPiFobReader
 			screen.Mutate(s => s
 				.Fill(black)
 				.DrawImage(logo150, 1, new Point(0, 0))
-				.DrawText(new TextGraphicsOptions
-				{
+				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 160,
 					VerticalAlignment = VerticalAlignment.Top,
@@ -85,22 +84,18 @@ namespace MmsPiFobReader
 			Font font;
 			string text;
 
-			if (seconds > 60)
-			{
+			if (seconds > 60) {
 				color = green;
 				bg = black;
 				font = littleFont;
 				text = $"Logged In\n{seconds / 60}m Remaining";
 			}
-			else if (seconds > 0)
-			{
-				if (seconds % 2 == 0)
-				{
+			else if (seconds > 0) {
+				if (seconds % 2 == 0) {
 					color = red;
 					bg = black;
 				}
-				else
-				{
+				else {
 					color = black;
 					bg = red;
 				}
@@ -108,8 +103,7 @@ namespace MmsPiFobReader
 				font = littleFont;
 				text = $"Logging Out!\n{seconds}s Remaining";
 			}
-			else
-			{
+			else {
 				color = blue;
 				bg = black;
 				font = bigFont;
@@ -118,8 +112,7 @@ namespace MmsPiFobReader
 
 			screen.Mutate(s => s
 				.Fill(bg, new RectangleF(159, 88, 480 - 159, 110))
-				.DrawText(new TextGraphicsOptions
-				{
+				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 160,
 					VerticalAlignment = VerticalAlignment.Center,
@@ -137,16 +130,24 @@ namespace MmsPiFobReader
 		{
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
-				.DrawText(new TextGraphicsOptions
-				{
+				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 12,
 					VerticalAlignment = VerticalAlignment.Center,
 				},
-					$"Hello, {user.Name}!\nRenewal due: {user.Expiration.ToString($"yyyy-MM-dd")}\nLogin to extend timer, '0#' to logout",
+					$"Hello, {user.Name}!\nRenewal due: {user.Expiration.ToString($"yyyy-MM-dd")}\nLogin to extend, '0       ' to Logout",
 					tinyFont,
 					white,
-					new PointF(6, 265)
+					new PointF(6, 263)
+					)
+				.DrawText(new TextGraphicsOptions {
+					HorizontalAlignment = HorizontalAlignment.Center,
+					VerticalAlignment = VerticalAlignment.Center,
+				},
+					"ENT",
+					entFont,
+					white,
+					new PointF(297, 298)
 					)
 				);
 		}
@@ -155,8 +156,7 @@ namespace MmsPiFobReader
 		{
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
-				.DrawText(new TextGraphicsOptions
-				{
+				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 12,
 					VerticalAlignment = VerticalAlignment.Center,
@@ -173,8 +173,7 @@ namespace MmsPiFobReader
 		{
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
-				.DrawText(new TextGraphicsOptions
-				{
+				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 12,
 					VerticalAlignment = VerticalAlignment.Top,
@@ -182,7 +181,7 @@ namespace MmsPiFobReader
 					contents,
 					hugeFont,
 					white,
-					new PointF(6, 248)
+					new PointF(6, 240)
 					)
 				);
 		}
@@ -199,8 +198,7 @@ namespace MmsPiFobReader
 					new PointF(480, 319),
 					new PointF(0, 319)
 				)
-				.DrawText(new TextGraphicsOptions
-				{
+				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 20,
 					VerticalAlignment = VerticalAlignment.Center,

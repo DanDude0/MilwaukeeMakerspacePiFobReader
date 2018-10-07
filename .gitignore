@@ -2,4 +2,8 @@
 packages
 bin
 obj
-/Database Mapping Tool/docs
+*.user
+PublishProfiles
+MmsPiFobReader Private.openssh
+MmsPiFobReader Private.ppk
+readerid.txt

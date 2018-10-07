@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -138,13 +138,11 @@ namespace MmsPiFobReader
 			Connect();
 
 			// Main activity loop
-			while (true)
-			{
+			while (true) {
 				var newSeconds = (int)Math.Floor(
 						(expiration - DateTime.Now).TotalSeconds);
 
-				if (newSeconds > -5 && newSeconds != seconds)
-				{
+				if (newSeconds > -5 && newSeconds != seconds) {
 					ReaderHardware.Warn(newSeconds);
 					Draw.Status(newSeconds);
 				}
@@ -154,46 +152,38 @@ namespace MmsPiFobReader
 				// This blocks for 5ms waiting for user input
 				var input = ReaderHardware.Read();
 
-				if (!string.IsNullOrEmpty(input))
-				{
+				if (!string.IsNullOrEmpty(input)) {
 					inputCleared = false;
 					lastEntry = DateTime.Now;
 				}
 
 				// We're not logged in
-				if (seconds <= 0)
-				{
+				if (seconds <= 0) {
 					// Transition from logged in state.
 					if (user != null)
 						Logout();
 
-					if (!inputCleared && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
-					{
+					if (!inputCleared && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30)) {
 						Draw.Prompt("Enter PIN or swipe fob");
 						userEntryBuffer = "";
 						inputCleared = true;
 					}
 				}
 				// We're Logged in
-				else
-				{
-					if (!inputCleared && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30))
-					{
+				else {
+					if (!inputCleared && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30)) {
 						Draw.User(user);
 						userEntryBuffer = "";
 						inputCleared = true;
 					}
 				}
 
-				if (input.Length == 8)
-				{
+				if (input.Length == 8) {
 					ProcessCommand($"W26#{input}");
 					userEntryBuffer = "";
 				}
-				else if (input.Length == 1)
-				{
-					switch (input[0])
-					{
+				else if (input.Length == 1) {
+					switch (input[0]) {
 						case '*':
 							Draw.Prompt("Enter PIN or swipe fob");
 							userEntryBuffer = "";
@@ -239,45 +229,37 @@ namespace MmsPiFobReader
 
 		static void ConnectThread()
 		{
-			while (true)
-			{
+			while (true) {
 				var random = new Random();
 
 				var message = loadingMessages[random.Next(loadingMessages.Length - 1)];
 
 				Draw.Loading(message);
 
-				try
-				{
+				try {
 					id = int.Parse(File.ReadAllText("readerid.txt"));
 				}
-				catch
-				{
+				catch {
 					Draw.Fatal("Reader ID is not set");
 				}
 
-				try
-				{
+				try {
 					if (id != 0)
 						server = new MilwaukeeMakerspaceApiClient();
 				}
-				catch
-				{
+				catch {
 					Draw.Fatal("Cannot reach server");
 				}
 
-				try
-				{
-					if (server != null)
-					{
+				try {
+					if (server != null) {
 						reader = server.ReaderLookup(id);
 
 						// Exit the loop after we've setup everything
 						break;
 					}
 				}
-				catch
-				{
+				catch {
 					Draw.Fatal("Server does not recognise reader ID");
 				}
 
@@ -288,27 +270,22 @@ namespace MmsPiFobReader
 		static void ProcessCommand(string command)
 		{
 			// Force Logout
-			if (command == "0#")
-			{
+			if (command == "0#") {
 				expiration = DateTime.Now - new TimeSpan(0, 0, 1);
 
 				Logout();
 			}
 			// Login / Extend
-			else
-			{
+			else {
 				Draw.Prompt("Authenticating. . .");
 
 				AuthenticationResult newUser;
 
-				try
-				{
+				try {
 					newUser = server.Authenticate(id, command);
 				}
-				catch (Exception ex)
-				{
-					switch (ex.InnerException)
-					{
+				catch (Exception ex) {
+					switch (ex.InnerException) {
 						case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
 							Draw.Prompt("Invalid key");
 							break;
@@ -320,8 +297,7 @@ namespace MmsPiFobReader
 					return;
 				}
 
-				if (!newUser.AccessGranted)
-				{
+				if (!newUser.AccessGranted) {
 					Draw.Prompt("Expired membership");
 
 					return;
@@ -348,6 +324,7 @@ namespace MmsPiFobReader
 			Draw.Status(-1, false);
 			Draw.Prompt("Enter PIN or swipe fob");
 			ReaderHardware.Logout();
+			server.Logout(id);
 		}
 	}
 }

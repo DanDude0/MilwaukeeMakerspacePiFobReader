@@ -5,10 +5,10 @@ namespace MmsPiFobReader
 {
 	static class WiringPi
 	{
-		[DllImport ("libwiringPi.so")]
+		[DllImport("libwiringPi.so")]
 		public static extern void pinMode(int pin, int mode);
 
-		[DllImport ("libwiringPi.so")]
+		[DllImport("libwiringPi.so")]
 		public static extern void digitalWrite(int pin, int value);
-    }
+	}
 }
