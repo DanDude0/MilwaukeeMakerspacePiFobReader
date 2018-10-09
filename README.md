@@ -166,6 +166,7 @@ Add the following lines to the bottom of the file:
 	core_freq=200
 	sdram_freq=400
 	over_voltage_sdram=0
+	gpu_mem=16
 	dtoverlay=pi3-disable-bt
 	enable_uart=0
 
@@ -181,7 +182,28 @@ TODO: Document assembly
 
 ### Install Client Software
 
-TODO: Document installation
+When you first power on the reader it should boot up, displaying a bunch of status messages on the screen, and one of the last messages on the screen should be:
+
+	My IP address is x.x.x.x
+
+Using this address you should use SSH to connect to the Pi from your desktop
+
+	ssh x.x.x.x
+
+Default user/password should be:
+
+	User: pi
+	Password: raspberry
+	
+Download and run the install script:
+
+	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/install.sh
+	chmod +x install.sh
+	sudo ./install.sh
+	
+Follow the directions on screen.
+
+If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
 
 ## I want to develop on a desktop machine, and deploy to a reader easily
 

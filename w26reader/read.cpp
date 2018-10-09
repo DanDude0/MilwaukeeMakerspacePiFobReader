@@ -132,7 +132,7 @@ char *readW26() {
 		else if (bitLen == 4 || bitLen == 8)
 		{
 			if (bitLen == 8)
-				data[0] = data[0] & 0xF
+				data[0] = data[0] & 0xF;
 			
 			if (data[0] == 11)
 				sprintf(output, "#");
