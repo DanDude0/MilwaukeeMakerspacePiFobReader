@@ -100,17 +100,71 @@ If you elected to install Visual Studio you can just open the `MmsPiFobReader.sl
 
 ## I want to setup an actual hardware reader
 
-### Parts List ###
+### Parts List
 
 There is a spreadsheet here containing parts, quantities, prices, and links to parts for purchase
-https://docs.google.com/spreadsheets/d/1saBPHnn_E8FyzVhVKWeM24Enc3zIGl8CUS3w7r8rCs0/edit?usp=sharing
 
-### Custom Circuit Board ###
+<https://docs.google.com/spreadsheets/d/1saBPHnn_E8FyzVhVKWeM24Enc3zIGl8CUS3w7r8rCs0/edit?usp=sharing>
+
+### Custom Circuit Board
 
 This is the schematic and layout for an interface board to go link the various hardware components
-https://easyeda.com/Dan_Dude/Pi-Fob-Reader
 
-TODO: Document Everything Else
+<https://easyeda.com/Dan_Dude/Pi-Fob-Reader>
+
+### Case
+
+TODO: Add plans for housing
+
+### Assembly
+
+TODO: Document assembly
+
+### Install OS
+
+Write `Raspbian Lite` onto Micro SD card using your desktop computer as documented here:
+
+<https://www.raspberrypi.org/downloads/raspbian/>
+
+<https://www.raspberrypi.org/documentation/installation/installing-images/README.md>
+
+### Configure OS for headless operation
+
+Before you install the SD card into the Pi for the first time, we need to configure a few things.
+
+Open up the root directory of the just created `boot` partition on the card.
+
+Create a blank text file called `ssh`. This will enable the ssh server so that you can control the OS without a keyboard attached.
+	
+Next create a text file called `wpa_supplicant.conf`. Add this text to the file, substituting in the SSID and Password of your WiFi Network. This will automatically connect the WiFi on boot.
+
+	ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+	update_config=1
+	country=US
+
+	network={
+		ssid="«your_SSID»"
+		psk="«your_PSK»"
+		key_mgmt=WPA-PSK
+	}
+	
+Next we have to configure the 3.5" screen as a device and point the console at it. 
+
+Open up the `cmdline.txt` file. Locate the `quiet` arguement:
+
+	quiet
+	
+Replace `quiet` with the following arguements:
+
+	fbcon=map:11 consoleblank=0 vt.global_cursor_default=0
+	
+Next, open the `config.txt` file. Go to the bottom of the file. Change `dtparam=audio` to `off`
+
+	dtparam=audio=off
+	
+Add the following lines to the bottom of the file:
+
+
 
 ## I want to develop on a desktop machine, and deploy to a reader easily
 
@@ -120,4 +174,4 @@ This is fun, start by setting up a desktop development environment as described 
 
 Then install PuTTY
 
-Use the deploy.bat script to push out new builds.
+Use the `deploy.bat` script to push out new builds.
