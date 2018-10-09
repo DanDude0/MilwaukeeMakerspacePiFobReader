@@ -164,6 +164,18 @@ Next, open the `config.txt` file. Go to the bottom of the file. Change `dtparam=
 	
 Add the following lines to the bottom of the file:
 
+	# Limit power consumption and improve stability
+	arm_freq=600
+	gpu_freq=200
+	core_freq=200
+	sdram_freq=400
+	over_voltage_sdram=0
+	dtoverlay=pi3-disable-bt
+	enable_uart=0
+
+	#Driver for screen
+	dtparam=spi=on
+	dtoverlay=piscreen,rotate=270,speed=24000000
 
 
 ## I want to develop on a desktop machine, and deploy to a reader easily
