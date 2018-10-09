@@ -201,7 +201,7 @@ Download and run the install script:
 	chmod +x install.sh
 	sudo ./install.sh
 	
-Follow the directions on screen.
+Follow the directions on screen. This install will take a LONG time, probably over 10 minutes. Once you've successfully made one reader, I highly suggest cloning the SD card to make subsequent readers, it will go much faster. All you need to change is the readerid.txt file for every new reader.
 
 If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
 
