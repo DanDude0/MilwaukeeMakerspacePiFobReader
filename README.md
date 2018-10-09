@@ -116,10 +116,6 @@ This is the schematic and layout for an interface board to go link the various h
 
 TODO: Add plans for housing
 
-### Assembly
-
-TODO: Document assembly
-
 ### Install OS
 
 Write `Raspbian Lite` onto Micro SD card using your desktop computer as documented here:
@@ -177,6 +173,15 @@ Add the following lines to the bottom of the file:
 	dtparam=spi=on
 	dtoverlay=piscreen,rotate=270,speed=24000000
 
+Now you can insert the SD card into your Raspberry Pi.
+
+### Assembly
+
+TODO: Document assembly
+
+### Install Client Software
+
+TODO: Document installation
 
 ## I want to develop on a desktop machine, and deploy to a reader easily
 
