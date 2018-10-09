@@ -129,8 +129,11 @@ char *readW26() {
 			for (int i = 0; i < 4; i++)
 				sprintf(output + i * 2, "%02X", (int)data[i]);
 		}
-		else if (bitLen == 4)
+		else if (bitLen == 4 || bitLen == 8)
 		{
+			if (bitLen == 8)
+				data[0] = data[0] & 0xF
+			
 			if (data[0] == 11)
 				sprintf(output, "#");
 			if (data[0] == 10)
