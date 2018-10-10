@@ -27,9 +27,9 @@ chmod +x build.sh
 
 # Build Application
 heading 'Building MmsPiFobReader Application'
-systemctl disable MmsPiFobReader
+systemctl stop MmsPiFobReader
 cd /root/MilwaukeeMakerspacePiFobReader/MmsPiFobReader
 dotnet publish -c Release -o /opt/MmsPiFobReader
 
 echo 'Upgrade completed, restarting reader'
-systemctl enable MmsPiFobReader
+systemctl start MmsPiFobReader
