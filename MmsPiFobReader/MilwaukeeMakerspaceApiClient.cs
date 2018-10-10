@@ -15,7 +15,9 @@ namespace MmsPiFobReader
 
 		public MilwaukeeMakerspaceApiClient()
 		{
-			SearchForServer();
+			// SSDP Not working inside MMS?
+			//SearchForServer();
+			server = "10.1.1.15";
 
 			var client = GetClient();
 
@@ -49,7 +51,7 @@ namespace MmsPiFobReader
 		{
 			var client = new HttpClient();
 			client.BaseAddress = new Uri($"http://{server}/");
-			client.Timeout = new TimeSpan(0, 0, 1);
+			client.Timeout = new TimeSpan(0, 0, 5);
 
 			return client;
 		}
@@ -72,7 +74,8 @@ namespace MmsPiFobReader
 				deviceLocator = new SsdpDeviceLocator(ip4);
 				deviceLocator.StartListeningForNotifications();
 				deviceLocator.DeviceAvailable += FoundDevice;
-				var unused = deviceLocator.SearchAsync("uuid:6111f321-2cee-455e-b203-4abfaf14b516", new TimeSpan(0, 0, 2));
+				var unused = deviceLocator.SearchAsync("uuid:6111f321-2cee-455e-b203-4abfaf14b516", new TimeSpan(0, 0, 5));
+				deviceLocator.StartListeningForNotifications();
 
 				for (int i = 0; i < 20; i += 1) {
 					if (!string.IsNullOrEmpty(server))

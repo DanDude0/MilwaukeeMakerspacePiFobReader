@@ -79,8 +79,8 @@ namespace MmsPiFobReader
 #if RPI
 			warningThread?.Join();
 
-			WiringPi.digitalWrite(24, 0);
-			WiringPi.digitalWrite(25, 0);
+			WiringPi.digitalWrite(22, 0);
+			WiringPi.digitalWrite(23, 0);
 			WiringPi.digitalWrite(24, 1);
 			WiringPi.digitalWrite(25, 1);
 			WiringPi.digitalWrite(26, 0);
