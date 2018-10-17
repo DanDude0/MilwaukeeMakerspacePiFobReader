@@ -18,7 +18,7 @@ namespace MmsPiFobReader
 		{
 			// SSDP Not working? Use override file
 			if (File.Exists("server.txt"))
-				server = File.ReadAllText("server.txt");
+				server = File.ReadAllText("server.txt").Replace("\n", "");
 			else
 				SearchForServer();
 
@@ -52,7 +52,7 @@ namespace MmsPiFobReader
 
 		private HttpClient GetClient()
 		{
-			Console.Write($"Connecting to: {server}");
+			Console.WriteLine($"Connecting to: {server}");
 
 			var client = new HttpClient();
 			client.BaseAddress = new Uri($"http://{server}/");
