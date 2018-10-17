@@ -239,7 +239,9 @@ namespace MmsPiFobReader
 				try {
 					id = int.Parse(File.ReadAllText("readerid.txt"));
 				}
-				catch {
+				catch (Exception ex) {
+					Log.Exception(ex);
+
 					Draw.Fatal("Reader ID is not set");
 				}
 
@@ -247,7 +249,9 @@ namespace MmsPiFobReader
 					if (id != 0)
 						server = new MilwaukeeMakerspaceApiClient();
 				}
-				catch {
+				catch (Exception ex) {
+					Log.Exception(ex);
+
 					Draw.Fatal("Cannot reach server");
 				}
 
@@ -259,7 +263,9 @@ namespace MmsPiFobReader
 						break;
 					}
 				}
-				catch {
+				catch (Exception ex) {
+					Log.Exception(ex);
+
 					Draw.Fatal("Server does not recognise reader ID");
 				}
 
@@ -277,38 +283,40 @@ namespace MmsPiFobReader
 			}
 			// Login / Extend
 			else {
-				Draw.Prompt("Authenticating. . .");
-
-				AuthenticationResult newUser;
-
-				try {
-					newUser = server.Authenticate(id, command);
-				}
-				catch (Exception ex) {
-					switch (ex.InnerException) {
-						case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
-							Draw.Prompt("Invalid key");
-							break;
-						default:
-							Connect();
-							break;
-					}
-
-					return;
-				}
-
-				if (!newUser.AccessGranted) {
-					Draw.Prompt("Expired membership");
-
-					return;
-				}
-
-				Login(newUser);
+				Login(command);
 			}
 		}
 
-		static void Login(AuthenticationResult newUser)
+		static void Login(string key)
 		{
+			Draw.Prompt("Authenticating. . .");
+
+			AuthenticationResult newUser;
+
+			try {
+				newUser = server.Authenticate(id, key);
+			}
+			catch (Exception ex) {
+				Log.Exception(ex);
+
+				switch (ex.InnerException) {
+					case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
+						Draw.Prompt("Invalid key");
+						break;
+					default:
+						Connect();
+						break;
+				}
+
+				return;
+			}
+
+			if (!newUser.AccessGranted) {
+				Draw.Prompt("Expired membership");
+
+				return;
+			}
+
 			inputCleared = true;
 			expiration = DateTime.Now + new TimeSpan(0, 0, reader.Timeout);
 			user = newUser;
@@ -324,7 +332,23 @@ namespace MmsPiFobReader
 			Draw.Status(-1, false);
 			Draw.Prompt("Enter PIN or swipe fob");
 			ReaderHardware.Logout();
-			server.Logout(id);
+
+			try {
+				server.Logout(id);
+			}
+			catch (Exception ex) {
+				Log.Exception(ex);
+
+				switch (ex.InnerException) {
+					case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
+						break;
+					default:
+						Connect();
+						break;
+				}
+
+				return;
+			}
 		}
 	}
 }

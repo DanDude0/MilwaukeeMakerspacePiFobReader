@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -15,9 +16,11 @@ namespace MmsPiFobReader
 
 		public MilwaukeeMakerspaceApiClient()
 		{
-			// SSDP Not working inside MMS?
-			//SearchForServer();
-			server = "10.1.1.15";
+			// SSDP Not working? Use override file
+			if (File.Exists("server.txt"))
+				server = File.ReadAllText("server.txt");
+			else
+				SearchForServer();
 
 			var client = GetClient();
 
