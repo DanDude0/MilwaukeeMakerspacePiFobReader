@@ -94,6 +94,10 @@ If you aren't working inside the actual Milwaukee Makerspace building, you'll ne
 
 <https://github.com/DanDude0/MilwaukeeMakerspaceApi>
 
+Now that you have an API server to connect to, The reader is designed to use the SSDP to find it automatically, so it should connect all on its own within a few seconds of the API becoming available. If it does not, your network may have firewalls in place that block this. You can override the SSDP by creating another text file named `server.txt` with a DNS name or an IP address to connect directly to. We'll use the address of the API server at Milwaukee Makerspace.
+
+	echo '10.1.1.15' > server.txt
+
 #### Or use Visual Studio on Windows:
 
 If you elected to install Visual Studio you can just open the `MmsPiFobReader.sln` solution file and run from within the IDE. You'll still need to set the `readerid.txt` file and have access to an instance API server.
