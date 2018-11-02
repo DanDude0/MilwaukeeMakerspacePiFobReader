@@ -12,9 +12,22 @@ echo -e '#\n####################\n'
 mkdir -p /opt/MmsPiFobReader
 
 # Set Reader Id
-heading 'Type the Reader Id you wish to set and press [ENTER]:'
-read READERID
+
+while [[ $READERID =~ ^-?[0-9]+$ ]]
+do
+	heading 'Type the Reader Id you wish to set and press [ENTER]:'
+	read READERID
+done
+
 echo $READERID > /opt/MmsPiFobReader/readerid.txt
+
+# Set Server
+heading '[Optional] If you wish you can hardcode the address of your API Server by typing it and pressing [ENTER] If you wish to use SSDP just press [ENTER] without typing anything:'
+read SERVER
+
+if [[ -n "${SERVER/[ ]*\n/}" ]]
+	echo $SERVER > /opt/MmsPiFobReader/server.txt
+fi
 
 # Work out of root user home
 cd /root
