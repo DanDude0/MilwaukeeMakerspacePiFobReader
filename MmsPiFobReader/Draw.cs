@@ -15,6 +15,7 @@ namespace MmsPiFobReader
 		private static Font hugeFont = new Font(arial, 120f, FontStyle.Regular);
 		private static Font bigFont = new Font(arial, 56f, FontStyle.Regular);
 		private static Font littleFont = new Font(arial, 45f, FontStyle.Regular);
+		private static Font smallerFont = new Font(arial, 42f, FontStyle.Regular);
 		private static Font tinyFont = new Font(arial, 31f, FontStyle.Regular);
 		private static Font entFont = new Font(arial, 24f, FontStyle.Regular);
 		private static Bgr565 black = new Bgr565(0, 0, 0);
@@ -85,10 +86,16 @@ namespace MmsPiFobReader
 			string text;
 
 			if (seconds > 60) {
+				var minutes = seconds / 60;
+
+				if (minutes > 99)
+					font = smallerFont;
+				else
+					font = littleFont;
+
 				color = green;
 				bg = black;
-				font = littleFont;
-				text = $"Logged In\n{seconds / 60}m Remaining";
+				text = $"Logged In\n{minutes}m Remaining";
 			}
 			else if (seconds > 0) {
 				if (seconds % 2 == 0) {
