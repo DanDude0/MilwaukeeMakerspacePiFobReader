@@ -129,8 +129,8 @@ namespace MmsPiFobReader
 
 		static void Main(string[] args)
 		{
+			ReaderHardware.Initialize();
 			Draw.Loading("");
-			ReaderHardware.Logout();
 			var userEntryBuffer = "";
 			var lastEntry = DateTime.MinValue;
 			var seconds = -1;
@@ -275,8 +275,12 @@ namespace MmsPiFobReader
 
 		static void ProcessCommand(string command)
 		{
+			// Empty Input
+			if (command == "#") {
+				// Do Nothing
+			}
 			// Force Logout
-			if (command == "0#") {
+			else if (command == "0#") {
 				expiration = DateTime.Now - new TimeSpan(0, 0, 1);
 
 				Logout();

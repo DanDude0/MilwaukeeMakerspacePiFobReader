@@ -1,13 +1,10 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Threading;
-#if RPI
-#else
 using SDL2;
-#endif
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
@@ -20,34 +17,39 @@ namespace MmsPiFobReader
 	class Screen
 	{
 		Image<Bgr565> buffer = new Image<Bgr565>(480, 320);
-
-#if RPI
-		FileStream frameBuffer = new FileStream("/dev/fb1", FileMode.Append);
 		byte[] currentFrame;
 		byte[] pendingFrame;
+		FileStream frameBuffer;
 		object frameLock = new object();
-#else
 		IntPtr window;
-#endif
 
 		public Screen()
 		{
-#if RPI
-			// We're taking over the screen
-			DisableConsole();
+			switch (ReaderHardware.Type) {
+				case HardwareType.OrangePi:
+				case HardwareType.RaspberryPi:
+					if (ReaderHardware.Type == HardwareType.OrangePi)
+						frameBuffer = new FileStream("/dev/fb0", FileMode.Append);
+					else if (ReaderHardware.Type == HardwareType.RaspberryPi)
+						frameBuffer = new FileStream("/dev/fb1", FileMode.Append);
 
-			// Handle SigTerm
-			Console.CancelKeyPress += EnableConsole;
-			AssemblyLoadContext.Default.Unloading += EnableConsole;
-#else
-			// Make a desktop window to draw the screen contents to
-			SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
-			window = SDL.SDL_CreateWindow("MmsPiFobReader", 50, 50, 480, 320, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
-			var renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
-			SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-			SDL.SDL_RenderClear(renderer);
-			SDL.SDL_RenderPresent(renderer);
-#endif
+					// We're taking over the screen
+					DisableConsole();
+
+					// Handle SigTerm
+					Console.CancelKeyPress += EnableConsole;
+					AssemblyLoadContext.Default.Unloading += EnableConsole;
+					break;
+				default:
+					// Make a desktop window to draw the screen contents to
+					SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
+					window = SDL.SDL_CreateWindow("MmsPiFobReader", 50, 50, 480, 320, SDL.SDL_WindowFlags.SDL_WINDOW_SHOWN);
+					var renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
+					SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+					SDL.SDL_RenderClear(renderer);
+					SDL.SDL_RenderPresent(renderer);
+					break;
+			}
 		}
 
 		public void Mutate(Action<IImageProcessingContext<Bgr565>> operation, bool draw = true)
@@ -60,7 +62,7 @@ namespace MmsPiFobReader
 
 		private static void DisableConsole()
 		{
-			File.WriteAllText("/sys/class/vtconsole/vtcon1/bind", "0");
+			File.AppendAllText("/sys/class/vtconsole/vtcon1/bind", "0");
 		}
 
 		private static void EnableConsole(AssemblyLoadContext obj)
@@ -70,7 +72,7 @@ namespace MmsPiFobReader
 
 		private static void EnableConsole(object sender, EventArgs e)
 		{
-			File.WriteAllText("/sys/class/vtconsole/vtcon1/bind", "1");
+			File.AppendAllText("/sys/class/vtconsole/vtcon1/bind", "1");
 			Process.Start("setupcon");
 		}
 
@@ -78,32 +80,35 @@ namespace MmsPiFobReader
 		{
 			var bytes = MemoryMarshal.AsBytes(buffer.GetPixelSpan()).ToArray();
 
-#if RPI
-			lock (frameLock) {
-				if (currentFrame == null)
-					currentFrame = bytes;
-				else {
-					pendingFrame = bytes;
-				}
+			switch (ReaderHardware.Type) {
+				case HardwareType.OrangePi:
+				case HardwareType.RaspberryPi:
+					lock (frameLock) {
+						if (currentFrame == null)
+							currentFrame = bytes;
+						else {
+							pendingFrame = bytes;
+						}
+					}
+
+					var thread = new Thread(DrawThread);
+					thread.Start();
+					break;
+				default:
+					// This code is seriously bloated and could almost certainly be faster, but it just needs to be good enough for debugging.
+					var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
+					var pointer = handle.AddrOfPinnedObject();
+					var bitmapSurface = SDL.SDL_CreateRGBSurfaceFrom(pointer, 480, 320, 16, 960, 0x1F << 11, 0x3F << 5, 0x1F, 0);
+					var windowSurface = SDL.SDL_GetWindowSurface(window);
+
+					SDL.SDL_BlitSurface(bitmapSurface, IntPtr.Zero, windowSurface, IntPtr.Zero);
+					SDL.SDL_FreeSurface(bitmapSurface);
+					handle.Free();
+					SDL.SDL_UpdateWindowSurface(window);
+					break;
 			}
-
-			var thread = new Thread(DrawThread);
-			thread.Start();
-#else
-			// This code is seriously bloated and could almost certainly be faster, but it just needs to be good enough for debugging.
-			var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-			var pointer = handle.AddrOfPinnedObject();
-			var bitmapSurface = SDL.SDL_CreateRGBSurfaceFrom(pointer, 480, 320, 16, 960, 0x1F << 11, 0x3F << 5, 0x1F, 0);
-			var windowSurface = SDL.SDL_GetWindowSurface(window);
-
-			SDL.SDL_BlitSurface(bitmapSurface, IntPtr.Zero, windowSurface, IntPtr.Zero);
-			SDL.SDL_FreeSurface(bitmapSurface);
-			handle.Free();
-			SDL.SDL_UpdateWindowSurface(window);
-#endif
 		}
 
-#if RPI
 		private void DrawThread()
 		{
 			while (true) {
@@ -119,6 +124,5 @@ namespace MmsPiFobReader
 				}
 			}
 		}
-#endif
 	}
 }

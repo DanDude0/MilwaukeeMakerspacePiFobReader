@@ -1,4 +1,4 @@
-﻿#region License
+#region License
 /* SDL2# - C# Wrapper for SDL2
  *
  * Copyright (c) 2013-2016 Ethan Lee.
@@ -78,19 +78,12 @@ namespace SDL2
 			 * See the CoreCLR source for more info.
 			 * -flibit
 			 */
-#if NETSTANDARD2_0
+
 			/* Modern C# lets you just send the byte*, nice! */
 			string result = System.Text.Encoding.UTF8.GetString(
-				(byte*) s,
-				(int) (ptr - (byte*) s)
+				(byte*)s,
+				(int)(ptr - (byte*)s)
 			);
-#else
-			/* Old C# requires an extra memcpy, bleh! */
-			int len = (int)(ptr - (byte*)s);
-			char* chars = stackalloc char[len];
-			int strLen = System.Text.Encoding.UTF8.GetChars((byte*)s, len, chars, len);
-			string result = new string(chars, 0, strLen);
-#endif
 
 			/* Some SDL functions will malloc, we have to free! */
 			if (freePtr) {

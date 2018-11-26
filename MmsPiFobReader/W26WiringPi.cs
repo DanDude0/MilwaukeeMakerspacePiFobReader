@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 
 namespace MmsPiFobReader
 {
 	// TODO, Port C++ W26 library to C# remove dependancy
-	static class ReadW26
+	static class W26WiringPi
 	{
 		public static void Initalize()
 		{
