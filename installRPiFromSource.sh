@@ -43,7 +43,7 @@ apt-get -y install git libunwind8 unattended-upgrades wiringpi
 
 # Install .Net Core
 heading 'Installing .Net Core'
-wget https://download.visualstudio.microsoft.com/download/pr/10b96626-02d8-415a-be85-051a2a48d0c2/5ec51d3d9f092ba558fb5f1f03d26699/dotnet-sdk-2.1.500-linux-arm.tar.gz
+wget https://download.visualstudio.microsoft.com/download/pr/201cbc49-c122-4653-a6c6-0680643d9a26/1951cfc077d868a31563a5a172d18d78/dotnet-sdk-2.1.500-linux-arm.tar.gz
 mkdir -p /opt/dotnet 
 tar zxf dotnet-sdk-2.1.500-linux-arm.tar.gz -C /opt/dotnet --checkpoint=.10
 ln -s /opt/dotnet/dotnet /usr/local/bin/
