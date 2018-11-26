@@ -14,12 +14,12 @@ Be sure to select the `.Net Core cross-platform development` workload.
 #### Alternate - Just install the necessary SDKs
 Get the installer for the .Net Core 2.1 SDK here:
 
-<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-2.1.402-windows-x64-installer>
+<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-2.1.500-windows-x64-installer>
 
 ### Mac
 Get the installer for the .Net Core 2.1 SDK here:
 
-<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-2.1.402-windows-x64-installer>
+<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-2.1.500-macos-x64-installer>
 
 Install the SDL2 library:
 	
