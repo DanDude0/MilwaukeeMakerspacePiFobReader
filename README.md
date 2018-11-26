@@ -102,7 +102,7 @@ Now that you have an API server to connect to, The reader is designed to use the
 
 If you elected to install Visual Studio you can just open the `MmsPiFobReader.sln` solution file and run from within the IDE. You'll still need to set the `readerid.txt` file and have access to an instance API server.
 
-## I want to setup an actual hardware reader
+## I want to setup an actual hardware reader using a Raspberry Pi
 
 ### Parts List
 
@@ -201,13 +201,19 @@ Default user/password should be:
 	
 Download and run the install script:
 
-	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/install.sh
-	chmod +x install.sh
-	sudo ./install.sh
+	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installRPi.sh
+	chmod +x installRPi.sh
+	sudo ./installRPi.sh
 	
 Follow the directions on screen. This install will take a LONG time, probably over 10 minutes. Once you've successfully made one reader, I highly suggest cloning the SD card to make subsequent readers, it will go much faster. All you need to change is the readerid.txt file for every new reader.
 
 If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
+
+## I want to setup an actual hardware reader using an Orange Pi
+
+This is possible, saves you quite a bit of cash on the most expensive component.
+
+TODO: Document/automate armbian configuration (it's quite a bit more involved than RPi)
 
 ## I want to develop on a desktop machine, and deploy to a reader easily
 
