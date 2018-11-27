@@ -10,6 +10,8 @@ namespace MmsPiFobReader
 {
 	static class Draw
 	{
+		public static bool ServiceMenuOverride = false;
+
 		private static Screen screen = new Screen();
 		private static FontFamily arial = new FontCollection().Install("LiberationSans-Regular.ttf");
 		private static Font hugeFont = new Font(arial, 120f, FontStyle.Regular);
@@ -29,6 +31,9 @@ namespace MmsPiFobReader
 
 		public static void Loading(string message)
 		{
+			if (ServiceMenuOverride)
+				return;
+
 			screen.Mutate(s => s
 				.Fill(black)
 				.DrawPolygon(
@@ -54,6 +59,9 @@ namespace MmsPiFobReader
 
 		public static void Heading(string name)
 		{
+			if (ServiceMenuOverride)
+				return;
+
 			screen.Mutate(s => s
 				.Fill(black)
 				.DrawImage(logo150, 1, new Point(0, 0))
@@ -80,6 +88,9 @@ namespace MmsPiFobReader
 
 		public static void Status(int seconds, bool draw = true)
 		{
+			if (ServiceMenuOverride)
+				return;
+
 			Bgr565 color;
 			Bgr565 bg;
 			Font font;
@@ -135,6 +146,9 @@ namespace MmsPiFobReader
 
 		public static void User(AuthenticationResult user)
 		{
+			if (ServiceMenuOverride)
+				return;
+
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
 				.DrawText(new TextGraphicsOptions {
@@ -161,6 +175,9 @@ namespace MmsPiFobReader
 
 		public static void Prompt(string contents)
 		{
+			if (ServiceMenuOverride)
+				return;
+
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
 				.DrawText(new TextGraphicsOptions {
@@ -178,6 +195,9 @@ namespace MmsPiFobReader
 
 		public static void Entry(string contents)
 		{
+			if (ServiceMenuOverride)
+				return;
+
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
 				.DrawText(new TextGraphicsOptions {
@@ -195,6 +215,9 @@ namespace MmsPiFobReader
 
 		public static void Fatal(string contents)
 		{
+			if (ServiceMenuOverride)
+				return;
+
 			screen.Mutate(s => s
 				.Fill(black)
 				.DrawPolygon(
@@ -214,6 +237,31 @@ namespace MmsPiFobReader
 					bigFont,
 					red,
 					new PointF(10, 160)
+					)
+				);
+		}
+
+		public static void Service(string message)
+		{
+			screen.Mutate(s => s
+				.Fill(black)
+				.DrawPolygon(
+					blue,
+					10,
+					new PointF(0, 0),
+					new PointF(480, 0),
+					new PointF(480, 319),
+					new PointF(0, 319)
+				)
+				.DrawText(new TextGraphicsOptions {
+					HorizontalAlignment = HorizontalAlignment.Left,
+					WrapTextWidth = 480 - 20,
+					VerticalAlignment = VerticalAlignment.Top,
+				},
+					message,
+					entFont,
+					white,
+					new PointF(10, 10)
 					)
 				);
 		}

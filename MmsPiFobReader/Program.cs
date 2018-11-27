@@ -9,6 +9,8 @@ namespace MmsPiFobReader
 {
 	class Program
 	{
+		const string ServiceMenuMagicCode = "1472536914725369#";
+
 		static MilwaukeeMakerspaceApiClient server;
 		static int id;
 		static DateTime expiration = DateTime.MinValue;
@@ -194,7 +196,12 @@ namespace MmsPiFobReader
 							break;
 						default:
 							userEntryBuffer += input[0];
-							Draw.Entry("".PadLeft(userEntryBuffer.Length, '*'));
+							var count = userEntryBuffer.Length;
+
+							if (count > 10)
+								count = 10;
+
+							Draw.Entry("".PadLeft(count, '*'));
 							break;
 					}
 				}
@@ -212,8 +219,20 @@ namespace MmsPiFobReader
 			connectingThread.Start();
 
 			// Spin the foreground thread to collect and throw away any user input while we are connecting.
-			while (reader == null)
-				ReaderHardware.Read();
+			var inputBuffer = "";
+
+			while (reader == null) {
+				var input = ReaderHardware.Read();
+
+				if (input == "*")
+					inputBuffer = "";
+				else
+					inputBuffer += input;
+
+				if (inputBuffer == ServiceMenuMagicCode) {
+					EnterServiceMenu(false);
+				}
+			}
 
 			inputCleared = true;
 			Draw.Heading(reader.Name);
@@ -276,7 +295,10 @@ namespace MmsPiFobReader
 		static void ProcessCommand(string command)
 		{
 			// Empty Input
-			if (command == "#") {
+			if (command == ServiceMenuMagicCode) {
+				EnterServiceMenu(true);
+			}
+			else if (command == "#") {
 				// Do Nothing
 			}
 			// Force Logout
@@ -352,6 +374,187 @@ namespace MmsPiFobReader
 				}
 
 				return;
+			}
+		}
+
+		static void EnterServiceMenu(bool reconnectOnExit)
+		{
+			Draw.ServiceMenuOverride = true;
+
+			var version = File.GetCreationTime("MmsPiFobReader.dll");
+			var hardware = "SDL";
+
+			if (File.Exists("/proc/device-tree/model"))
+				hardware = File.ReadAllText("/proc/device-tree/model");
+
+			var ip = MilwaukeeMakerspaceApiClient.GetLocalIp4Address();
+			var draw = true;
+
+			while (true) {
+				var serverAddress = server?.Server;
+
+				if (serverAddress == null && File.Exists("server.txt"))
+					serverAddress = File.ReadAllText("server.txt").Replace("\n", "");
+
+				if (draw) {
+					Draw.Service($@"Version: {version}
+Hardware: {hardware}
+IP Address: {ip}
+Reader Id: {id}
+Server: {serverAddress}
+
+[1] Set Reader Id
+[2] Set Server
+[3] Reboot Reader
+[4] Shutdown Reader
+[5] Exit Reader Application");
+
+					draw = false;
+				}
+
+				var input = ReaderHardware.Read();
+
+				if (input.Length != 1)
+					continue;
+
+				switch (input[0]) {
+					case '*':
+						Draw.ServiceMenuOverride = false;
+
+						if (reconnectOnExit)
+							Connect();
+
+						return;
+					case '1':
+						EnterReaderId();
+						draw = true;
+						break;
+					case '2':
+						EnterServer();
+						draw = true;
+						break;
+					case '3':
+						Process.Start("reboot");
+						Environment.Exit(0);
+						break;
+					case '4':
+						Process.Start("shutdown", "-hP 0");
+						Environment.Exit(0);
+						break;
+					case '5':
+						Environment.Exit(0);
+						break;
+				}
+			}
+		}
+
+		static void EnterReaderId()
+		{
+			var draw = true;
+			var inputBuffer = "";
+
+			while (true) {
+				if (draw) {
+					Draw.Service($@"Enter Reader Id Using Keypad
+
+Reader Id: {inputBuffer}
+
+[ENT] Save
+[ESC] Cancel
+");
+
+					draw = false;
+				}
+
+				var input = ReaderHardware.Read();
+
+				if (input.Length != 1)
+					continue;
+
+				switch (input[0]) {
+					case '*':
+						return;
+					case '#':
+						id = int.Parse(inputBuffer);
+						File.WriteAllText("readerid.txt", inputBuffer);
+						return;
+					default:
+						inputBuffer += input;
+						draw = true;
+						break;
+				}
+			}
+		}
+
+		static void EnterServer()
+		{
+			var draw = true;
+			var inputBuffer = "";
+			var segments = new string[] { "_", "x", "x", "x", "x" };
+			int currentSegment = 0;
+
+			while (true) {
+				var complete = $"{segments[0]}.{segments[1]}.{segments[2]}.{segments[3]}:{segments[4]}";
+
+				if (draw) {
+					Draw.Service($@"Enter Server Using Keypad
+
+Server: {complete}
+
+[ENT] Next / Save
+[ESC] Previous / Cancel 
+");
+
+					draw = false;
+				}
+
+				var input = ReaderHardware.Read();
+
+				if (input.Length != 1)
+					continue;
+
+				draw = true;
+
+				switch (input[0]) {
+					case '*':
+						inputBuffer = "";
+
+						if (segments[currentSegment] != "x" && segments[currentSegment] != "_") {
+							if (currentSegment < 4)
+								segments[currentSegment + 1] = "x";
+
+							segments[currentSegment] = "_";
+						}
+						else if (currentSegment > 0) {
+							currentSegment -= 1;
+							segments[currentSegment + 1] = "x";
+							segments[currentSegment] = "_";
+						}
+						else
+							return;
+						break;
+					case '#':
+						inputBuffer = "";
+
+						if (segments[currentSegment] == "x" && segments[currentSegment] == "_") {
+							segments[currentSegment] = "0";
+						}
+
+						if (currentSegment < 4) {
+							currentSegment += 1;
+							segments[currentSegment] = "_";
+						}
+						else {
+							File.WriteAllText("server.txt", complete);
+							return;
+						}
+						break;
+					default:
+						inputBuffer += input;
+
+						segments[currentSegment] = inputBuffer;
+						break;
+				}
 			}
 		}
 	}

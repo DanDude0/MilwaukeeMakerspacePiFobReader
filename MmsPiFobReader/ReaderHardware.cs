@@ -36,7 +36,8 @@ namespace MmsPiFobReader
 					WiringPi.pinMode(27, 1); // Beeper
 					break;
 				case HardwareType.RaspberryPi:
-					W26WiringPi.Initalize();
+					W26SysFs.Initalize();
+					WiringPi.wiringPiSetup();
 					WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable
 					WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable
 					WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable
@@ -53,9 +54,8 @@ namespace MmsPiFobReader
 		{
 			switch (Type) {
 				case HardwareType.OrangePi:
-					return W26SysFs.Read();
 				case HardwareType.RaspberryPi:
-					return W26WiringPi.Read();
+					return W26SysFs.Read();
 				default:
 					Thread.Sleep(5);
 

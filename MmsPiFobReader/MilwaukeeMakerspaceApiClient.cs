@@ -12,13 +12,13 @@ namespace MmsPiFobReader
 {
 	class MilwaukeeMakerspaceApiClient
 	{
-		string server;
+		public string Server { get; private set; }
 
 		public MilwaukeeMakerspaceApiClient()
 		{
 			// SSDP Not working? Use override file
 			if (File.Exists("server.txt"))
-				server = File.ReadAllText("server.txt").Replace("\n", "");
+				Server = File.ReadAllText("server.txt").Replace("\n", "");
 			else
 				SearchForServer();
 
@@ -52,10 +52,10 @@ namespace MmsPiFobReader
 
 		private HttpClient GetClient()
 		{
-			Console.WriteLine($"Connecting to: {server}");
+			Console.WriteLine($"Connecting to: {Server}");
 
 			var client = new HttpClient();
-			client.BaseAddress = new Uri($"http://{server}/");
+			client.BaseAddress = new Uri($"http://{Server}/");
 			client.Timeout = new TimeSpan(0, 0, 5);
 
 			return client;
@@ -83,7 +83,7 @@ namespace MmsPiFobReader
 				deviceLocator.StartListeningForNotifications();
 
 				for (int i = 0; i < 20; i += 1) {
-					if (!string.IsNullOrEmpty(server))
+					if (!string.IsNullOrEmpty(Server))
 						// We found a server, let the constructor continue
 						return;
 
@@ -101,10 +101,10 @@ namespace MmsPiFobReader
 		private void FoundDevice(object sender, DeviceAvailableEventArgs e)
 		{
 			if (e.DiscoveredDevice.Usn.Contains("6111f321-2cee-455e-b203-4abfaf14b516"))
-				server = e.DiscoveredDevice.DescriptionLocation.Host;
+				Server = e.DiscoveredDevice.DescriptionLocation.Host;
 		}
 
-		private static string GetLocalIp4Address()
+		public static string GetLocalIp4Address()
 		{
 			var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
 

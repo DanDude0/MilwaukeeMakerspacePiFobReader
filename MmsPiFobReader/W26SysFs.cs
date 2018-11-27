@@ -8,11 +8,8 @@ namespace MmsPiFobReader
 {
 	static class W26SysFs
 	{
-		private const int POLLPRI = 2;
-		private const int O_RDONLY = 0;
-		private const int SEEK_SET = 0;
-		private const string d0Pin = "199";
-		private const string d1Pin = "198";
+		private static string d0Pin;
+		private static string d1Pin;
 
 		private static object bufferLock = new object();
 		private static int readBuffer = 0;
@@ -20,6 +17,17 @@ namespace MmsPiFobReader
 
 		public static void Initalize()
 		{
+			switch (ReaderHardware.Type) {
+				case HardwareType.OrangePi:
+					d0Pin = "199";
+					d1Pin = "198";
+					break;
+				case HardwareType.RaspberryPi:
+					d0Pin = "21";
+					d1Pin = "20";
+					break;
+			}
+
 			if (!Directory.Exists($"/sys/class/gpio/gpio{d0Pin}"))
 				File.WriteAllText("/sys/class/gpio/export", d0Pin);
 

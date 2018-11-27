@@ -53,14 +53,6 @@ rm -f dotnet-sdk-2.1.500-linux-arm.tar.gz
 heading 'Downloading Source'
 git clone https://github.com/DanDude0/MilwaukeeMakerspacePiFobReader.git
 
-# Build W26 Library
-heading 'Building W26 Library'
-cd /root/MilwaukeeMakerspacePiFobReader
-cp -rf w26reader /opt/
-cd /opt/w26reader
-chmod +x build.sh
-./build.sh
-
 # Build Application
 heading 'Building MmsPiFobReader Application'
 cd /root/MilwaukeeMakerspacePiFobReader/MmsPiFobReader
