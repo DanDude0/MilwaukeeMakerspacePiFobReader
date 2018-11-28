@@ -230,6 +230,8 @@ namespace MmsPiFobReader
 					inputBuffer += input;
 
 				if (inputBuffer == ServiceMenuMagicCode) {
+					inputBuffer = "";
+
 					EnterServiceMenu(false);
 				}
 			}
@@ -427,11 +429,9 @@ Server: {serverAddress}
 						return;
 					case '1':
 						EnterReaderId();
-						draw = true;
 						break;
 					case '2':
 						EnterServer();
-						draw = true;
 						break;
 					case '3':
 						Process.Start("reboot");
@@ -445,6 +445,8 @@ Server: {serverAddress}
 						Environment.Exit(0);
 						break;
 				}
+
+				draw = true;
 			}
 		}
 
