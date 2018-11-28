@@ -52,8 +52,6 @@ namespace MmsPiFobReader
 
 		private HttpClient GetClient()
 		{
-			Console.WriteLine($"Connecting to: {Server}");
-
 			var client = new HttpClient();
 			client.BaseAddress = new Uri($"http://{Server}/");
 			client.Timeout = new TimeSpan(0, 0, 5);

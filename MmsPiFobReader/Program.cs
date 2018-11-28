@@ -442,6 +442,7 @@ Server: {serverAddress}
 						Environment.Exit(0);
 						break;
 					case '5':
+						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 				}
