@@ -98,6 +98,7 @@ namespace MmsPiFobReader
 			switch (Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
+					WiringPi.digitalWrite(22, 1);
 					WiringPi.digitalWrite(23, 1);
 					WiringPi.digitalWrite(24, 0);
 					WiringPi.digitalWrite(25, 0);
