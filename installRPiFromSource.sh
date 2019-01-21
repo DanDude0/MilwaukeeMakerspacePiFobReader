@@ -39,7 +39,11 @@ apt-get -y dist-upgrade
 
 # Install needed libraries
 heading 'Installing Libraries'
-apt-get -y install git libunwind8 unattended-upgrades wiringpi
+apt-get -y install git libunwind8 wiringpi busybox-syslogd ntp
+
+# Remove unneeded libraries
+heading 'Removing Libraries'
+apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog
 
 # Install .Net Core
 heading 'Installing .Net Core'
