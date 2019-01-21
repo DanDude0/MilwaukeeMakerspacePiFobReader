@@ -9,7 +9,7 @@ namespace MmsPiFobReader
 {
 	class Program
 	{
-		const string ServiceMenuMagicCode = "1472536914725369#";
+		const string ServiceMenuMagicCode = "14725369#";
 
 		static MilwaukeeMakerspaceApiClient server;
 		static int id;
