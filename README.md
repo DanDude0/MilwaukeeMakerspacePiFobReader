@@ -211,9 +211,59 @@ If everything went to plan, you just need to reboot the Pi and the reader will s
 
 ## I want to setup an actual hardware reader using an Orange Pi
 
-This is possible, saves you quite a bit of cash on the most expensive component.
+This is possible, saves you quite a bit of cash on the most expensive component. The setup is slightly more convoluted, you need to install the software using a local keyboard and monitor on the Pi before you assemble the reader.
 
-TODO: Document/automate armbian configuration (it's quite a bit more involved than RPi)
+### Parts List
+
+There is a spreadsheet here containing parts, quantities, prices, and links to parts for purchase
+
+<https://docs.google.com/spreadsheets/d/1saBPHnn_E8FyzVhVKWeM24Enc3zIGl8CUS3w7r8rCs0/edit?usp=sharing>
+
+### Custom Circuit Board
+
+This is the schematic and layout for an interface board to go link the various hardware components
+
+<https://easyeda.com/Dan_Dude/Pi-Fob-Reader>
+
+### Case
+
+TODO: Add plans for housing
+
+### Install OS
+
+Write `Armbian Stretch` onto Micro SD card using your desktop computer as documented here:
+
+<https://www.armbian.com/orange-pi-lite/>
+
+<https://docs.armbian.com/User-Guide_Getting-Started/>
+
+Now you can insert the SD card into your Orange Pi.
+
+### Configure OS for headless operation
+
+You'll need to boot up the Pi connected to a HDMI screen and keyboard the first time, so that you can make configuration changes necessary.
+
+Login as `root` and set a password.
+
+Connect to your wifi network:
+
+	nmtui-connect
+
+### Install Client Software
+
+Download and run the install script:
+
+	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh
+	chmod +x installOPi.sh
+	sudo ./installOPi.sh
+	
+Follow the directions on screen. This install will take a LONG time, probably over 10 minutes. Once you've successfully made one reader, I highly suggest cloning the SD card to make subsequent readers, it will go much faster. All you need to change is the readerid.txt file for every new reader.
+
+If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
+	
+### Assembly
+
+TODO: Document assembly
 
 ## I want to develop on a desktop machine, and deploy to a reader easily
 

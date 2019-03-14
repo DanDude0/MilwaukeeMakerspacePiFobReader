@@ -45,6 +45,12 @@ apt-get -y install git libunwind8 wiringpi busybox-syslogd ntp
 heading 'Removing Libraries'
 apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog
 
+# Setup Screen Hardware
+heading 'Setting Up Screen Hardware'
+sed -i.bak 's/rootfstype=ext4/rootfstype=ext4\noverlays=spi-spidev spi-add-cs1\nparam_spidev_spi_bus=0\nparam_spidev_spi_cs=1\nextraargs=consoleblank=0 vt.global_cursor_default=0/g' armbianEnv.txt
+echo 'fbtft\nfbtft_device' > /etc/modules-load.d/fbtft.conf
+echo 'options fbtft_device rotate=270 name=piscreen speed=16000000 gpios=reset:2,dc:71 txbuflen=32768' > /etc/modprobe.d/fbtft.conf
+
 # Install SSH Key
 mkdir ~/.ssh && touch ~/.ssh/authorized_keys
 chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
@@ -57,6 +63,14 @@ mkdir -p /opt/dotnet
 tar zxf dotnet-sdk-2.1.500-linux-arm.tar.gz -C /opt/dotnet --checkpoint=.10
 ln -s /opt/dotnet/dotnet /usr/local/bin/
 rm -f dotnet-sdk-2.1.500-linux-arm.tar.gz
+
+# Install .Net Core
+heading 'Installing WiringOP'
+cd /root
+git clone https://github.com/zhaolei/WiringOP.git -b h3 
+cd WiringOP
+chmod +x ./build
+sudo ./build
 
 # Install MmsPiFobReader
 heading 'Installer MmsPiFobReader'
