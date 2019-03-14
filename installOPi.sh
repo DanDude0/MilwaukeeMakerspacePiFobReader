@@ -39,7 +39,7 @@ apt-get -y dist-upgrade
 
 # Install needed libraries
 heading 'Installing Libraries'
-apt-get -y install git libunwind8 wiringpi busybox-syslogd ntp
+apt-get -y install git libunwind8 busybox-syslogd ntp
 
 # Remove unneeded libraries
 heading 'Removing Libraries'
