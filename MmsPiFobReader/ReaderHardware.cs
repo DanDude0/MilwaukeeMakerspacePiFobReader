@@ -28,20 +28,44 @@ namespace MmsPiFobReader
 				case HardwareType.OrangePi:
 					W26SysFs.Initalize();
 					WiringPi.wiringPiSetup();
-					WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable
-					WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable
-					WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable
-					WiringPi.pinMode(25, 1); // Equipment Trigger, Logged in disable
+					WiringPi.pinMode(9, 1); // Equipment Trigger, 1
+					WiringPi.pinMode(7, 1); // Equipment Trigger, 2
+					WiringPi.pinMode(15, 1); // Equipment Trigger, 3
+					WiringPi.pinMode(16, 1); // Equipment Trigger, 4
+					WiringPi.pinMode(0, 1); // Equipment Trigger, 5
+					WiringPi.pinMode(1, 1); // Equipment Trigger, 6
+					WiringPi.pinMode(2, 1); // Equipment Trigger, 7
+					WiringPi.pinMode(3, 1); // Equipment Trigger, 8
+					WiringPi.pinMode(4, 1); // Equipment Trigger, 9
+					WiringPi.pinMode(5, 1); // Equipment Trigger, 10
+					WiringPi.pinMode(6, 1); // Equipment Trigger, 11
+					WiringPi.pinMode(21, 1); // Equipment Trigger, 12
+					WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable, 13
+					WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable, 14
+					WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable, 15
+					WiringPi.pinMode(25, 1); // Equipment Trigger, Logged in disable, 16
 					WiringPi.pinMode(26, 1); // LED 
 					WiringPi.pinMode(27, 1); // Beeper
 					break;
 				case HardwareType.RaspberryPi:
 					W26SysFs.Initalize();
 					WiringPi.wiringPiSetup();
-					WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable
-					WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable
-					WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable
-					WiringPi.pinMode(25, 1); // Equipment Trigger, Logged in disable
+					WiringPi.pinMode(9, 1); // Equipment Trigger, 1
+					WiringPi.pinMode(7, 1); // Equipment Trigger, 2
+					WiringPi.pinMode(15, 1); // Equipment Trigger, 3
+					WiringPi.pinMode(16, 1); // Equipment Trigger, 4
+					WiringPi.pinMode(0, 1); // Equipment Trigger, 5
+					WiringPi.pinMode(1, 1); // Equipment Trigger, 6
+					WiringPi.pinMode(2, 1); // Equipment Trigger, 7
+					WiringPi.pinMode(3, 1); // Equipment Trigger, 8
+					WiringPi.pinMode(4, 1); // Equipment Trigger, 9
+					WiringPi.pinMode(5, 1); // Equipment Trigger, 10
+					WiringPi.pinMode(6, 1); // Equipment Trigger, 11
+					WiringPi.pinMode(21, 1); // Equipment Trigger, 12
+					WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable, 13
+					WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable, 14
+					WiringPi.pinMode(24, 1); // Equipment Trigger, Logged in disable, 15
+					WiringPi.pinMode(25, 1); // Equipment Trigger, Logged in disable, 16
 					WiringPi.pinMode(26, 1); // LED 
 					WiringPi.pinMode(27, 1); // Beeper
 					break;
