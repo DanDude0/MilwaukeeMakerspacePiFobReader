@@ -1,4 +1,4 @@
-﻿namespace MmsPiFobReader
+namespace MmsPiFobReader
 {
 	public class ReaderResult
 	{
@@ -6,5 +6,6 @@
 		public int Timeout { get; set; }
 		public bool Enabled { get; set; }
 		public string Group { get; set; }
+		public string Settings { get; set; }
 	}
 }

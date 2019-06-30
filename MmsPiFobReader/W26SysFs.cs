@@ -100,6 +100,7 @@ namespace MmsPiFobReader
 					if (d0 == '0')
 						continue;
 					else if (d1 == '0')
+
 						readBuffer += 1;
 				}
 				else {

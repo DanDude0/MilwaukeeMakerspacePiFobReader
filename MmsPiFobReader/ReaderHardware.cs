@@ -125,6 +125,19 @@ namespace MmsPiFobReader
 			}
 		}
 
+		public static void Output(int i)
+		{
+			switch (Type) {
+				case HardwareType.OrangePi:
+				case HardwareType.RaspberryPi:
+					WiringPi.digitalWrite(22, i & 1);
+					WiringPi.digitalWrite(23, i >> 1 & 1);
+					WiringPi.digitalWrite(24, i >> 2 & 1);
+					WiringPi.digitalWrite(25, i >> 3 & 1);
+					break;
+			}
+		}
+
 		public static void Warn(int seconds)
 		{
 			switch (Type) {

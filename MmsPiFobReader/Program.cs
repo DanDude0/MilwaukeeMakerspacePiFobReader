@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace MmsPiFobReader
 {
@@ -16,6 +17,8 @@ namespace MmsPiFobReader
 		static DateTime expiration = DateTime.MinValue;
 		static AuthenticationResult user;
 		static ReaderResult reader;
+		static JObject settings;
+		static bool cabinetMode;
 		static bool inputCleared;
 
 		// With all due respect to Sim City!
@@ -239,6 +242,7 @@ namespace MmsPiFobReader
 			inputCleared = true;
 			Draw.Heading(reader.Name);
 			Draw.Status(-1, false);
+			Logout();
 
 			if (user != null)
 				Draw.User(user);
@@ -279,6 +283,8 @@ namespace MmsPiFobReader
 				try {
 					if (server != null) {
 						reader = server.ReaderLookup(id);
+						settings = JObject.Parse(reader.Settings);
+						cabinetMode = settings?["mode"]?.ToString() == "cabinet";
 
 						// Exit the loop after we've setup everything
 						break;
@@ -345,12 +351,26 @@ namespace MmsPiFobReader
 				return;
 			}
 
+			string tool = null;
+
+			if (cabinetMode) {
+				tool = EnterCabinetMenu();
+
+				Draw.Heading(reader.Name);
+			}
+
 			inputCleared = true;
 			expiration = DateTime.Now + new TimeSpan(0, 0, reader.Timeout);
 			user = newUser;
 			Draw.Status(reader.Timeout, false);
-			Draw.User(user);
-			ReaderHardware.Login();
+
+			if (cabinetMode) {
+				Draw.Prompt($"Selected: {tool}");
+			}
+			else {
+				Draw.User(user);
+				ReaderHardware.Login();
+			}
 		}
 
 		static void Logout()
@@ -359,7 +379,11 @@ namespace MmsPiFobReader
 			user = null;
 			Draw.Status(-1, false);
 			Draw.Prompt("Enter PIN or swipe fob");
-			ReaderHardware.Logout();
+
+			if (cabinetMode)
+				ReaderHardware.Output(0);
+			else
+				ReaderHardware.Logout();
 
 			try {
 				server.Logout(id);
@@ -379,9 +403,69 @@ namespace MmsPiFobReader
 			}
 		}
 
+		static string EnterCabinetMenu()
+		{
+			var draw = true;
+			var inputBuffer = "";
+			var items = settings?["items"] as JArray;
+
+			if (items == null) {
+				Draw.Prompt("Cannot Read Item List");
+
+				return "Cannot Read Item List";
+			}
+
+			Draw.MenuOverride = true;
+
+			while (true) {
+				if (draw) {
+					var menu = $"Select a tool:\n";
+
+					foreach (var item in items) {
+						menu += $"[{item?["id"]}] {item?["name"]}\n";
+					}
+
+					if (inputBuffer.Length > 0)
+						menu += $"\nSelected: {inputBuffer}";
+
+					Draw.Service(menu);
+
+					draw = false;
+				}
+
+				var input = ReaderHardware.Read();
+
+				if (input.Length != 1)
+					continue;
+
+				switch (input[0]) {
+					case '*':
+						if (inputBuffer.Length > 0)
+							inputBuffer = inputBuffer.Substring(0, inputBuffer.Length - 1);
+
+						draw = true;
+						break;
+					case '#':
+						id = int.Parse(inputBuffer);
+
+						var item = items?[id - 1]?["name"]?.ToString();
+
+						ReaderHardware.Output(id);
+						server.Action(id, inputBuffer);
+						Draw.MenuOverride = false;
+
+						return item;
+					default:
+						inputBuffer += input;
+						draw = true;
+						break;
+				}
+			}
+		}
+
 		static void EnterServiceMenu(bool reconnectOnExit)
 		{
-			Draw.ServiceMenuOverride = true;
+			Draw.MenuOverride = true;
 
 			var version = File.GetCreationTime("MmsPiFobReader.dll");
 			var hardware = "SDL";
@@ -421,7 +505,7 @@ Server: {serverAddress}
 
 				switch (input[0]) {
 					case '*':
-						Draw.ServiceMenuOverride = false;
+						Draw.MenuOverride = false;
 
 						if (reconnectOnExit)
 							Connect();

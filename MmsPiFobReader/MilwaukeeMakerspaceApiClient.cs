@@ -50,6 +50,13 @@ namespace MmsPiFobReader
 			client.GetAsync($"authenticate/logout/{id}/").Result.EnsureSuccessStatusCode();
 		}
 
+		public void Action(int id, string details)
+		{
+			var client = GetClient();
+
+			client.GetAsync($"authenticate/action/{id}/{details}").Result.EnsureSuccessStatusCode();
+		}
+
 		private HttpClient GetClient()
 		{
 			var client = new HttpClient();

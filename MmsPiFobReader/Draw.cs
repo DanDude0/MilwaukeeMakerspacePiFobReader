@@ -10,7 +10,7 @@ namespace MmsPiFobReader
 {
 	static class Draw
 	{
-		public static bool ServiceMenuOverride = false;
+		public static bool MenuOverride = false;
 
 		private static Screen screen = new Screen();
 		private static FontFamily arial = new FontCollection().Install("LiberationSans-Regular.ttf");
@@ -31,7 +31,7 @@ namespace MmsPiFobReader
 
 		public static void Loading(string message)
 		{
-			if (ServiceMenuOverride)
+			if (MenuOverride)
 				return;
 
 			screen.Mutate(s => s
@@ -59,7 +59,7 @@ namespace MmsPiFobReader
 
 		public static void Heading(string name)
 		{
-			if (ServiceMenuOverride)
+			if (MenuOverride)
 				return;
 
 			screen.Mutate(s => s
@@ -88,7 +88,7 @@ namespace MmsPiFobReader
 
 		public static void Status(int seconds, bool draw = true)
 		{
-			if (ServiceMenuOverride)
+			if (MenuOverride)
 				return;
 
 			Bgr565 color;
@@ -146,7 +146,7 @@ namespace MmsPiFobReader
 
 		public static void User(AuthenticationResult user)
 		{
-			if (ServiceMenuOverride)
+			if (MenuOverride)
 				return;
 
 			screen.Mutate(s => s
@@ -175,7 +175,7 @@ namespace MmsPiFobReader
 
 		public static void Prompt(string contents)
 		{
-			if (ServiceMenuOverride)
+			if (MenuOverride)
 				return;
 
 			screen.Mutate(s => s
@@ -195,7 +195,7 @@ namespace MmsPiFobReader
 
 		public static void Entry(string contents)
 		{
-			if (ServiceMenuOverride)
+			if (MenuOverride)
 				return;
 
 			screen.Mutate(s => s
@@ -215,7 +215,7 @@ namespace MmsPiFobReader
 
 		public static void Fatal(string contents)
 		{
-			if (ServiceMenuOverride)
+			if (MenuOverride)
 				return;
 
 			screen.Mutate(s => s
