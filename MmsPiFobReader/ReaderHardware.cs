@@ -33,12 +33,12 @@ namespace MmsPiFobReader
 					WiringPi.pinMode(15, 1); // Equipment Trigger, 3
 					WiringPi.pinMode(16, 1); // Equipment Trigger, 4
 					WiringPi.pinMode(0, 1); // Equipment Trigger, 5
-					WiringPi.pinMode(1, 1); // Equipment Trigger, 6
+											//					WiringPi.pinMode(1, 1); // Equipment Trigger, 6
 					WiringPi.pinMode(2, 1); // Equipment Trigger, 7
 					WiringPi.pinMode(3, 1); // Equipment Trigger, 8
 					WiringPi.pinMode(4, 1); // Equipment Trigger, 9
-					WiringPi.pinMode(5, 1); // Equipment Trigger, 10
-					WiringPi.pinMode(6, 1); // Equipment Trigger, 11
+											//					WiringPi.pinMode(5, 1); // Equipment Trigger, 10
+											//					WiringPi.pinMode(6, 1); // Equipment Trigger, 11
 					WiringPi.pinMode(21, 1); // Equipment Trigger, 12
 					WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable, 13
 					WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable, 14
@@ -55,12 +55,12 @@ namespace MmsPiFobReader
 					WiringPi.pinMode(15, 1); // Equipment Trigger, 3
 					WiringPi.pinMode(16, 1); // Equipment Trigger, 4
 					WiringPi.pinMode(0, 1); // Equipment Trigger, 5
-					WiringPi.pinMode(1, 1); // Equipment Trigger, 6
+											//					WiringPi.pinMode(1, 1); // Equipment Trigger, 6
 					WiringPi.pinMode(2, 1); // Equipment Trigger, 7
 					WiringPi.pinMode(3, 1); // Equipment Trigger, 8
 					WiringPi.pinMode(4, 1); // Equipment Trigger, 9
-					WiringPi.pinMode(5, 1); // Equipment Trigger, 10
-					WiringPi.pinMode(6, 1); // Equipment Trigger, 11
+											//					WiringPi.pinMode(5, 1); // Equipment Trigger, 10
+											//					WiringPi.pinMode(6, 1); // Equipment Trigger, 11
 					WiringPi.pinMode(21, 1); // Equipment Trigger, 12
 					WiringPi.pinMode(22, 1); // Equipment Trigger, Logged in enable, 13
 					WiringPi.pinMode(23, 1); // Equipment Trigger, Logged in enable, 14
@@ -159,12 +159,12 @@ namespace MmsPiFobReader
 					WiringPi.digitalWrite(15, 0); // Equipment Trigger, 3
 					WiringPi.digitalWrite(16, 0); // Equipment Trigger, 4
 					WiringPi.digitalWrite(0, 0); // Equipment Trigger, 5
-					WiringPi.digitalWrite(1, 0); // Equipment Trigger, 6
+												 //WiringPi.digitalWrite(1, 0); // Equipment Trigger, 6
 					WiringPi.digitalWrite(2, 0); // Equipment Trigger, 7
 					WiringPi.digitalWrite(3, 0); // Equipment Trigger, 8
 					WiringPi.digitalWrite(4, 0); // Equipment Trigger, 9
-					WiringPi.digitalWrite(5, 0); // Equipment Trigger, 10
-					WiringPi.digitalWrite(6, 0); // Equipment Trigger, 11
+												 //WiringPi.digitalWrite(5, 0); // Equipment Trigger, 10
+												 //WiringPi.digitalWrite(6, 0); // Equipment Trigger, 11
 					WiringPi.digitalWrite(21, 0); // Equipment Trigger, 12
 					WiringPi.digitalWrite(22, 0); // Equipment Trigger, 13
 					WiringPi.digitalWrite(23, 0); // Equipment Trigger, 14
@@ -188,7 +188,7 @@ namespace MmsPiFobReader
 							WiringPi.digitalWrite(0, 1); // Equipment Trigger, 5
 							break;
 						case 6:
-							WiringPi.digitalWrite(1, 1); // Equipment Trigger, 6
+							//WiringPi.digitalWrite(1, 1); // Equipment Trigger, 6
 							break;
 						case 7:
 							WiringPi.digitalWrite(2, 1); // Equipment Trigger, 7
@@ -200,10 +200,10 @@ namespace MmsPiFobReader
 							WiringPi.digitalWrite(4, 1); // Equipment Trigger, 9
 							break;
 						case 10:
-							WiringPi.digitalWrite(5, 1); // Equipment Trigger, 10
+							//WiringPi.digitalWrite(5, 1); // Equipment Trigger, 10
 							break;
 						case 11:
-							WiringPi.digitalWrite(6, 1); // Equipment Trigger, 11
+							//WiringPi.digitalWrite(6, 1); // Equipment Trigger, 11
 							break;
 						case 12:
 							WiringPi.digitalWrite(21, 1); // Equipment Trigger, 12
