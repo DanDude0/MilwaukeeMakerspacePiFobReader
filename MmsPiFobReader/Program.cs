@@ -446,12 +446,12 @@ namespace MmsPiFobReader
 						draw = true;
 						break;
 					case '#':
-						id = int.Parse(inputBuffer);
+						var code = int.Parse(inputBuffer);
 
-						var item = items?[id - 1]?["name"]?.ToString();
+						var item = items?[code - 1]?["name"]?.ToString();
 
-						ReaderHardware.Output(id);
-						server.Action(id, inputBuffer);
+						ReaderHardware.Output(code);
+						server.Action(id, item);
 						Draw.MenuOverride = false;
 
 						return item;
