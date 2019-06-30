@@ -154,10 +154,73 @@ namespace MmsPiFobReader
 			switch (Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					WiringPi.digitalWrite(22, i & 1);
-					WiringPi.digitalWrite(23, i >> 1 & 1);
-					WiringPi.digitalWrite(24, i >> 2 & 1);
-					WiringPi.digitalWrite(25, i >> 3 & 1);
+					WiringPi.digitalWrite(9, 0); // Equipment Trigger, 1
+					WiringPi.digitalWrite(7, 0); // Equipment Trigger, 2
+					WiringPi.digitalWrite(15, 0); // Equipment Trigger, 3
+					WiringPi.digitalWrite(16, 0); // Equipment Trigger, 4
+					WiringPi.digitalWrite(0, 0); // Equipment Trigger, 5
+					WiringPi.digitalWrite(1, 0); // Equipment Trigger, 6
+					WiringPi.digitalWrite(2, 0); // Equipment Trigger, 7
+					WiringPi.digitalWrite(3, 0); // Equipment Trigger, 8
+					WiringPi.digitalWrite(4, 0); // Equipment Trigger, 9
+					WiringPi.digitalWrite(5, 0); // Equipment Trigger, 10
+					WiringPi.digitalWrite(6, 0); // Equipment Trigger, 11
+					WiringPi.digitalWrite(21, 0); // Equipment Trigger, 12
+					WiringPi.digitalWrite(22, 0); // Equipment Trigger, 13
+					WiringPi.digitalWrite(23, 0); // Equipment Trigger, 14
+					WiringPi.digitalWrite(24, 0); // Equipment Trigger, 15
+					WiringPi.digitalWrite(25, 0); // Equipment Trigger, 16
+
+					switch (i) {
+						case 1:
+							WiringPi.digitalWrite(9, 1); // Equipment Trigger, 1
+							break;
+						case 2:
+							WiringPi.digitalWrite(7, 1); // Equipment Trigger, 2
+							break;
+						case 3:
+							WiringPi.digitalWrite(15, 1); // Equipment Trigger, 3
+							break;
+						case 4:
+							WiringPi.digitalWrite(16, 1); // Equipment Trigger, 4
+							break;
+						case 5:
+							WiringPi.digitalWrite(0, 1); // Equipment Trigger, 5
+							break;
+						case 6:
+							WiringPi.digitalWrite(1, 1); // Equipment Trigger, 6
+							break;
+						case 7:
+							WiringPi.digitalWrite(2, 1); // Equipment Trigger, 7
+							break;
+						case 8:
+							WiringPi.digitalWrite(3, 1); // Equipment Trigger, 8
+							break;
+						case 9:
+							WiringPi.digitalWrite(4, 1); // Equipment Trigger, 9
+							break;
+						case 10:
+							WiringPi.digitalWrite(5, 1); // Equipment Trigger, 10
+							break;
+						case 11:
+							WiringPi.digitalWrite(6, 1); // Equipment Trigger, 11
+							break;
+						case 12:
+							WiringPi.digitalWrite(21, 1); // Equipment Trigger, 12
+							break;
+						case 13:
+							WiringPi.digitalWrite(22, 1); // Equipment Trigger, 13
+							break;
+						case 14:
+							WiringPi.digitalWrite(23, 1); // Equipment Trigger, 14
+							break;
+						case 15:
+							WiringPi.digitalWrite(24, 1); // Equipment Trigger, 15
+							break;
+						case 16:
+							WiringPi.digitalWrite(25, 1); // Equipment Trigger, 16
+							break;
+					}
 					break;
 			}
 		}
