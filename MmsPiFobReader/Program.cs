@@ -19,6 +19,7 @@ namespace MmsPiFobReader
 		static ReaderResult reader;
 		static JObject settings;
 		static bool cabinetMode;
+		static bool warningBeep;
 		static bool inputCleared;
 
 		// With all due respect to Sim City!
@@ -148,7 +149,9 @@ namespace MmsPiFobReader
 						(expiration - DateTime.Now).TotalSeconds);
 
 				if (newSeconds > -5 && newSeconds != seconds) {
-					ReaderHardware.Warn(newSeconds);
+					if (warningBeep)
+						ReaderHardware.Warn(newSeconds);
+
 					Draw.Status(newSeconds);
 				}
 
@@ -283,8 +286,16 @@ namespace MmsPiFobReader
 				try {
 					if (server != null) {
 						reader = server.ReaderLookup(id);
-						settings = JObject.Parse(reader.Settings);
+
+						try {
+							settings = JObject.Parse(reader.Settings);
+						}
+						catch {
+							// Do Nothing
+						}
+
 						cabinetMode = settings?["mode"]?.ToString() == "cabinet";
+						warningBeep = (bool?)settings?["warn"] ?? true;
 
 						// Exit the loop after we've setup everything
 						break;
