@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -19,6 +20,7 @@ namespace MmsPiFobReader
 		static ReaderResult reader;
 		static JObject settings;
 		static bool cabinetMode;
+		static Dictionary<int, string> cabinetItems;
 		static bool warningBeep;
 		static bool inputCleared;
 
@@ -287,15 +289,35 @@ namespace MmsPiFobReader
 					if (server != null) {
 						reader = server.ReaderLookup(id);
 
+						cabinetMode = false;
+						warningBeep = true;
+						cabinetItems?.Clear();
+
 						try {
 							settings = JObject.Parse(reader.Settings);
+
+							cabinetMode = settings?["mode"]?.ToString() == "cabinet";
+							warningBeep = (bool?)settings?["warn"] ?? true;
+
+							if (cabinetMode) {
+								var itemsList = settings?["items"] as JArray;
+
+								if (itemsList == null) {
+									Draw.Fatal("Cannot Read Item List");
+
+									continue;
+								}
+
+								cabinetItems = new Dictionary<int, string>(itemsList.Count);
+
+								foreach (var item in itemsList) {
+									cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
+								}
+							}
 						}
 						catch {
 							// Do Nothing
 						}
-
-						cabinetMode = settings?["mode"]?.ToString() == "cabinet";
-						warningBeep = (bool?)settings?["warn"] ?? true;
 
 						// Exit the loop after we've setup everything
 						break;
@@ -362,23 +384,16 @@ namespace MmsPiFobReader
 				return;
 			}
 
-			string tool = null;
-
-			if (cabinetMode) {
-				tool = EnterCabinetMenu();
-
-				Draw.Heading(reader.Name);
-			}
-
 			inputCleared = true;
-			expiration = DateTime.Now + new TimeSpan(0, 0, reader.Timeout);
 			user = newUser;
-			Draw.Status(reader.Timeout, false);
 
 			if (cabinetMode) {
-				Draw.Prompt($"Selected: {tool}");
+				EnterCabinetMenu();
 			}
 			else {
+				expiration = DateTime.Now + new TimeSpan(0, 0, reader.Timeout);
+
+				Draw.Status(reader.Timeout, false);
 				Draw.User(user);
 				ReaderHardware.Login();
 			}
@@ -414,32 +429,24 @@ namespace MmsPiFobReader
 			}
 		}
 
-		static string EnterCabinetMenu()
+		static void EnterCabinetMenu()
 		{
 			var draw = true;
 			var inputBuffer = "";
-			var items = settings?["items"] as JArray;
-
-			if (items == null) {
-				Draw.Prompt("Cannot Read Item List");
-
-				return "Cannot Read Item List";
-			}
 
 			Draw.MenuOverride = true;
 
 			while (true) {
 				if (draw) {
-					var menu = $"Select a tool:\n";
+					var menu = "";
 
-					foreach (var item in items) {
-						menu += $"[{item?["id"]}] {item?["name"]}\n";
+					foreach (var item in cabinetItems) {
+						menu += $"[{item.Key}] {item.Value}\n";
 					}
 
-					if (inputBuffer.Length > 0)
-						menu += $"\nSelected: {inputBuffer}";
+					var entry = $"\nSelect a tool: {inputBuffer}";
 
-					Draw.Service(menu);
+					Draw.Cabinet(menu, entry);
 
 					draw = false;
 				}
@@ -457,15 +464,26 @@ namespace MmsPiFobReader
 						draw = true;
 						break;
 					case '#':
-						var code = int.Parse(inputBuffer);
+						int.TryParse(inputBuffer, out var code);
 
-						var item = items?[code - 1]?["name"]?.ToString();
+						if (cabinetItems.ContainsKey(code)) {
+							var item = cabinetItems[code];
 
-						ReaderHardware.Output(code);
-						server.Action(id, item);
-						Draw.MenuOverride = false;
-
-						return item;
+							Draw.MenuOverride = false;
+							Draw.Heading(reader.Name);
+							Draw.Prompt($"Selected: {item}");
+							ReaderHardware.Output(code);
+							server.Action(id, item);
+							Thread.Sleep(300);
+							ReaderHardware.Output(0);
+							Thread.Sleep(700);
+							return;
+						}
+						else {
+							inputBuffer = "";
+							draw = true;
+						}
+						break;
 					default:
 						inputBuffer += input;
 						draw = true;
@@ -502,9 +520,10 @@ Server: {serverAddress}
 
 [1] Set Reader Id
 [2] Set Server
-[3] Reboot Reader
-[4] Shutdown Reader
-[5] Exit Reader Application");
+[3] Test Cabinet Menu
+[4] Reboot Reader
+[5] Shutdown Reader
+[6] Exit Reader Application");
 
 					draw = false;
 				}
@@ -529,14 +548,17 @@ Server: {serverAddress}
 						EnterServer();
 						break;
 					case '3':
+						EnterCabinetMenu();
+						break;
+					case '4':
 						Process.Start("reboot");
 						Environment.Exit(0);
 						break;
-					case '4':
+					case '5':
 						Process.Start("shutdown", "-hP 0");
 						Environment.Exit(0);
 						break;
-					case '5':
+					case '6':
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
@@ -573,7 +595,7 @@ Reader Id: {inputBuffer}
 					case '*':
 						return;
 					case '#':
-						id = int.Parse(inputBuffer);
+						int.TryParse(inputBuffer, out id);
 						File.WriteAllText("readerid.txt", inputBuffer);
 						return;
 					default:

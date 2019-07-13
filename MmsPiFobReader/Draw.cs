@@ -20,6 +20,8 @@ namespace MmsPiFobReader
 		private static Font smallerFont = new Font(arial, 42f, FontStyle.Regular);
 		private static Font tinyFont = new Font(arial, 31f, FontStyle.Regular);
 		private static Font entFont = new Font(arial, 24f, FontStyle.Regular);
+		private static Font microFont = new Font(arial, 23f, FontStyle.Regular);
+		private static Font nanoFont = new Font(arial, 21f, FontStyle.Regular);
 		private static Bgr565 black = new Bgr565(0, 0, 0);
 		private static Bgr565 white = new Bgr565(1, 1, 1);
 		private static Bgr565 red = new Bgr565(1, 0.1f, 0.1f);
@@ -259,9 +261,61 @@ namespace MmsPiFobReader
 					VerticalAlignment = VerticalAlignment.Top,
 				},
 					message,
-					entFont,
+					microFont,
 					white,
 					new PointF(10, 10)
+					)
+				);
+		}
+
+		public static void Cabinet(string message, string entry)
+		{
+			var lineCount = 1;
+
+			foreach (var c in message)
+				if (c == '\n')
+					lineCount += 1;
+
+			Font font = tinyFont;
+
+			if (lineCount > 11)
+				font = new Font(tinyFont, 21);
+			else if (lineCount > 10)
+				font = new Font(tinyFont, 23);
+			else if (lineCount > 9)
+				font = new Font(tinyFont, 26);
+			else if (lineCount > 8)
+				font = new Font(tinyFont, 28);
+
+			screen.Mutate(s => s
+				.Fill(black)
+				.DrawPolygon(
+					blue,
+					10,
+					new PointF(0, 0),
+					new PointF(480, 0),
+					new PointF(480, 319),
+					new PointF(0, 319)
+				)
+				.DrawText(new TextGraphicsOptions {
+					HorizontalAlignment = HorizontalAlignment.Left,
+					WrapTextWidth = 480 - 20,
+					VerticalAlignment = VerticalAlignment.Top,
+				},
+					message,
+					font,
+					white,
+					new PointF(10, 10)
+					)
+				.DrawText(new TextGraphicsOptions {
+					 HorizontalAlignment = HorizontalAlignment.Left,
+					 WrapTextWidth = 480 - 20,
+					 VerticalAlignment = VerticalAlignment.Top,
+				 },
+					entry,
+					smallerFont,
+					white,
+					new PointF(10, 230)
 					)
 				);
 		}
