@@ -472,11 +472,11 @@ namespace MmsPiFobReader
 							Draw.MenuOverride = false;
 							Draw.Heading(reader.Name);
 							Draw.Prompt($"Selected: {item}");
-							ReaderHardware.Output(code);
 							server.Action(id, item);
-							Thread.Sleep(300);
+							ReaderHardware.Output(code);
+							Thread.Sleep(400);
 							ReaderHardware.Output(0);
-							Thread.Sleep(700);
+							Thread.Sleep(600);
 							return;
 						}
 						else {
