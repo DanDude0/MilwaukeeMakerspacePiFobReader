@@ -38,8 +38,8 @@ namespace MmsPiFobReader
 		public AuthenticationResult Authenticate(int id, string key)
 		{
 			var client = GetClient();
-			var result = client.GetStringAsync($"authenticate/json/{id}/{key}").Result;
-
+			var result = client.GetStringAsync($"authenticate/json/{id}/{Uri.EscapeDataString(key)}").Result;
+			
 			return JsonConvert.DeserializeObject<AuthenticationResult>(result);
 		}
 
@@ -54,7 +54,7 @@ namespace MmsPiFobReader
 		{
 			var client = GetClient();
 
-			client.GetAsync($"authenticate/action/{id}/{details}").Result.EnsureSuccessStatusCode();
+			client.GetAsync($"authenticate/action/{id}/{Uri.EscapeDataString(details)}").Result.EnsureSuccessStatusCode();
 		}
 
 		private HttpClient GetClient()
