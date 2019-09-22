@@ -52,7 +52,7 @@ namespace MmsPiFobReader
 			}
 		}
 
-		public void Mutate(Action<IImageProcessingContext<Bgr565>> operation, bool draw = true)
+		public void Mutate(Action<IImageProcessingContext> operation, bool draw = true)
 		{
 			buffer.Mutate(operation);
 

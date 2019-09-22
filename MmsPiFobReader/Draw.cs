@@ -22,12 +22,12 @@ namespace MmsPiFobReader
 		private static Font entFont = new Font(arial, 24f, FontStyle.Regular);
 		private static Font microFont = new Font(arial, 23f, FontStyle.Regular);
 		private static Font nanoFont = new Font(arial, 21f, FontStyle.Regular);
-		private static Bgr565 black = new Bgr565(0, 0, 0);
-		private static Bgr565 white = new Bgr565(1, 1, 1);
-		private static Bgr565 red = new Bgr565(1, 0.1f, 0.1f);
-		private static Bgr565 green = new Bgr565(0.1f, 1, 0.1f);
-		private static Bgr565 blue = new Bgr565(0.3f, 0.3f, 1);
-		private static Bgr565 grey = new Bgr565(0.5f, 0.5f, 0.5f);
+		private static Color black = Color.FromRgb(0, 0, 0);
+		private static Color white = Color.FromRgb(255, 255, 255);
+		private static Color red = Color.FromRgb(255, 26, 26);
+		private static Color green = Color.FromRgb(26, 255, 26);
+		private static Color blue = Color.FromRgb(76, 76, 255);
+		private static Color grey = Color.FromRgb(128, 128, 128);
 		private static Image<Bgr565> logo200 = Image.Load<Bgr565>("mms200x226.png");
 		private static Image<Bgr565> logo150 = Image.Load<Bgr565>("mms150x170.png");
 
@@ -66,7 +66,7 @@ namespace MmsPiFobReader
 
 			screen.Mutate(s => s
 				.Fill(black)
-				.DrawImage(logo150, 1, new Point(0, 0))
+				.DrawImage(logo150, new Point(0, 0), 1)
 				.DrawText(new TextGraphicsOptions {
 					HorizontalAlignment = HorizontalAlignment.Center,
 					WrapTextWidth = 480 - 160,
@@ -93,8 +93,8 @@ namespace MmsPiFobReader
 			if (MenuOverride)
 				return;
 
-			Bgr565 color;
-			Bgr565 bg;
+			Color color;
+			Color bg;
 			Font font;
 			string text;
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>netcoreapp2.1</TargetFramework>
+		<TargetFramework>netcoreapp2.2</TargetFramework>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<NoWarn>NU1701,CS0618</NoWarn>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -16,10 +16,10 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
 		<PackageReference Include="Rssdp" Version="4.0.2" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0005" />
-		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0005" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
+		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Update="LiberationSans-Regular.ttf">
