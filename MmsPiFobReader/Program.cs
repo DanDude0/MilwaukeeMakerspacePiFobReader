@@ -563,15 +563,20 @@ Reader Id: {id}   Server: {serverAddress}
 								break;
 						}
 
+						Process.Start("systemctl", "stop MmsPiW26Interface");
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 					case '5':
 						Process.Start("reboot");
+						Process.Start("systemctl", "stop MmsPiW26Interface");
+						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 					case '6':
 						Process.Start("shutdown", "-hP 0");
+						Process.Start("systemctl", "stop MmsPiW26Interface");
+						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 					case '7':
