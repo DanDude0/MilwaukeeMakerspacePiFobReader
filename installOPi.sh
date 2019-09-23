@@ -48,6 +48,10 @@ apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog
 
 # Setup Screen Hardware
 heading 'Setting Up Screen Hardware'
+if [ -f "/boot/armbianEnv.txt.bak" ]
+then
+	cp -f /boot/armbianEnv.txt.bak /boot/armbianEnv.txt
+fi
 sed -i.bak 's/rootfstype=ext4/rootfstype=ext4\noverlays=spi-spidev spi-add-cs1\nparam_spidev_spi_bus=0\nparam_spidev_spi_cs=1\nextraargs=consoleblank=0 vt.global_cursor_default=0/g' /boot/armbianEnv.txt
 echo -e 'fbtft\nfbtft_device' > /etc/modules-load.d/fbtft.conf
 echo 'options fbtft_device rotate=270 name=piscreen speed=16000000 gpios=reset:2,dc:71 txbuflen=32768' > /etc/modprobe.d/fbtft.conf
@@ -61,6 +65,7 @@ echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAgEAvaHWKFt0zD0HAiv/PrTT/Qx0g4RxRAnbCrxO2C
 # Install WiringOP
 heading 'Installing WiringOP'
 cd /root
+rm -rfv WiringOP
 git clone https://github.com/zhaolei/WiringOP.git -b h3 
 cd WiringOP
 chmod +x ./build
@@ -69,6 +74,7 @@ sudo ./build
 # Install MmsPiW26Interface
 heading 'Installing MmsPiW26Interface'
 cd /opt/MmsPiW26Interface
+rm -rfv *
 wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/MmsPiW26Interface.cpp
 wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/build.sh
 chmod +x build.sh
@@ -76,7 +82,9 @@ chmod +x build.sh
 
 # Install MmsPiFobReader
 heading 'Installer MmsPiFobReader'
-cd /root
+cd /opt/MmsPiFobReader
+rm -rfv *
+cd /tmp
 curl -s https://api.github.com/repos/DanDude0/MilwaukeeMakerspacePiFobReader/releases/latest | grep -P "(?<=browser_download_url\": \")https://.*zip" -o | wget -i -
 unzip -o MmsPiFobReader.zip -d /opt/MmsPiFobReader
 rm -f MmsPiFobReader.zip
@@ -90,7 +98,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/opt/MmsPiFobReader
-ExecStart=/usr/local/bin/dotnet /opt/MmsPiFobReader/MmsPiFobReader.dll
+ExecStart=/opt/MmsPiFobReader/MmsPiFobReader
 KillMode=process
 Restart=always
 User=root
@@ -111,9 +119,7 @@ KillMode=process
 Restart=always
 User=root
 CPUAffinity=3
-CPUSchedulingPolicy=fifo
-CPUSchedulingPriority=99
-Nice=-20
+Nice=-1
 
 [Install]
 WantedBy=multi-user.target
