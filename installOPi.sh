@@ -14,6 +14,7 @@ mkdir -p /opt/MmsPiFobReader
 
 # Set Reader Id
 if [ ! -f /opt/MmsPiFobReader/readerid.txt ]
+then
 	while ! [[ $READERID =~ ^-?[0-9]+$ ]]
 	do
 		heading 'Type the Reader Id you wish to set and press [ENTER]:'
@@ -25,6 +26,7 @@ echo $READERID > /opt/MmsPiFobReader/readerid.txt
 
 # Set Server
 if [ ! -f /opt/MmsPiFobReader/server.txt ]
+then
 	heading '[Optional] If you wish you can hardcode the address of your API Server by typing it and pressing [ENTER]:\n+- If you wish to use SSDP just press [ENTER] without typing anything:'
 	read SERVER
 
