@@ -20,9 +20,9 @@ then
 		heading 'Type the Reader Id you wish to set and press [ENTER]:'
 		read READERID
 	done
+	
+	echo $READERID > /opt/MmsPiFobReader/readerid.txt
 fi
-
-echo $READERID > /opt/MmsPiFobReader/readerid.txt
 
 # Set Server
 if [ ! -f /opt/MmsPiFobReader/server.txt ]
