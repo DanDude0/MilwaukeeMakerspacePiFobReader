@@ -90,8 +90,8 @@ chmod +x build.sh
 # Install MmsPiFobReader
 heading 'Installer MmsPiFobReader'
 cd /tmp
-mv /opt/MmsPiFobReader/readerid.txt /tmp
-mv /opt/MmsPiFobReader/server.txt /tmp
+mv /opt/MmsPiFobReader/readerid.txt /tmp/
+mv /opt/MmsPiFobReader/server.txt /tmp/
 rm -rfv /opt/MmsPiFobReader/*
 curl -s https://api.github.com/repos/DanDude0/MilwaukeeMakerspacePiFobReader/releases/latest | grep -P "(?<=browser_download_url\": \")https://.*zip" -o | wget -i -
 unzip -o MmsPiFobReader.zip -d /opt/MmsPiFobReader
