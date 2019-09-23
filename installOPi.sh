@@ -9,6 +9,7 @@ heading ()
 echo -e '\n\n\n\n####################\n#'
 echo -e '#  This will install MilwaukeeMakerspacePiFobReader on this system'
 echo -e '#\n####################\n'
+mkdir -p /opt/MmsPiW26Interface
 mkdir -p /opt/MmsPiFobReader
 
 # Set Reader Id
@@ -57,21 +58,21 @@ mkdir ~/.ssh && touch ~/.ssh/authorized_keys
 chmod 700 ~/.ssh && chmod 600 ~/.ssh/authorized_keys
 echo 'ssh-rsa AAAAB3NzaC1yc2EAAAABJQAAAgEAvaHWKFt0zD0HAiv/PrTT/Qx0g4RxRAnbCrxO2C9oqPifXtcuKTW0aWNp0NyQMEQz/KFLZtzyRJi3A7rjEOH/6qotuhV7T5KJT39OgCL4A4vK1e4R+h8ZmitgIPGR5HYzW8X+1ODhGhO04nLh7LELHdYxy9gZWaMFNC3F1hlkCJF3WepkMClFoqt4pv8UHA4yWjS8eaudvcdPnoSdO2bAAuoCao/tB78dJomkxV8laDENb5wgwqNv/1p3yxTK+y1srxRcJyr6dFS6us9puVEfbpWFuMrW9v/NxylcCa1TOp1F3iKCkg8WQQPNbTC7drIh9J8Ntma/1wFPsFHfQcQ0oqgz0QDK/z8F1w1PQmh+exlK5gk0769Zt4EaTUJ8xDFf++fBIFVgGE8FnLjHRmaNfGWe3Uw0Kd9pzbXfOmcqMxvKCapTKG0c/j7fOJUIXE4BIYFB00FezEQs4e5d+rZ5Pc6SW3ue/4fB3+JoI4Kh1C2lx7SreODhgkc+uLYK31W/Z/jtJ3CwYSLz2EIdwJXLGHyPavhTxLi6mhEUpFNI85NUIOBxc2Fhx34kDEbrGPL7tiLiJo4ZfIVEog8ghgcBnxVuDFlMi/poAU8cLO2USAx0XCkF2kkyeuiBHuze/qzjO0YEXxeEapgbJnDIO0kJHONiLmjAV0DysZ1sNV8EBhs= MmsPiFobReader' > ~/.ssh/authorized_keys
 
-# Install .Net Core
-heading 'Installing .Net Core'
-wget https://download.visualstudio.microsoft.com/download/pr/201cbc49-c122-4653-a6c6-0680643d9a26/1951cfc077d868a31563a5a172d18d78/dotnet-sdk-2.1.500-linux-arm.tar.gz
-mkdir -p /opt/dotnet 
-tar zxf dotnet-sdk-2.1.500-linux-arm.tar.gz -C /opt/dotnet --checkpoint=.10
-ln -s /opt/dotnet/dotnet /usr/local/bin/
-rm -f dotnet-sdk-2.1.500-linux-arm.tar.gz
-
-# Install .Net Core
+# Install WiringOP
 heading 'Installing WiringOP'
 cd /root
 git clone https://github.com/zhaolei/WiringOP.git -b h3 
 cd WiringOP
 chmod +x ./build
 sudo ./build
+
+# Install MmsPiW26Interface
+heading 'Installing MmsPiW26Interface'
+cd /opt/MmsPiW26Interface
+wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/MmsPiW26Interface.cpp
+wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/build.sh
+chmod +x build.sh
+./build.sh
 
 # Install MmsPiFobReader
 heading 'Installer MmsPiFobReader'
@@ -81,7 +82,7 @@ unzip -o MmsPiFobReader.zip -d /opt/MmsPiFobReader
 rm -f MmsPiFobReader.zip
 
 # Install Systemd Unit
-heading 'Installing Systemd Unit'
+heading 'Installing Systemd Units'
 cat > /etc/systemd/system/MmsPiFobReader.service << 'END'
 [Unit]
 Description=Milwaukee Makerspace Pi Fob Reader Client
@@ -93,10 +94,31 @@ ExecStart=/usr/local/bin/dotnet /opt/MmsPiFobReader/MmsPiFobReader.dll
 KillMode=process
 Restart=always
 User=root
+CPUAffinity=1 2
 
 [Install]
 WantedBy=multi-user.target
 END
-systemctl enable MmsPiFobReader
+cat > /etc/systemd/system/MmsPiW26Interface.service << 'END'
+[Unit]
+Description=Milwaukee Makerspace Pi W26 Interface
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/MmsPiW26Interface
+ExecStart=/opt/MmsPiW26Interface/MmsPiW26Interface
+KillMode=process
+Restart=always
+User=root
+CPUAffinity=3
+CPUSchedulingPolicy=fifo
+CPUSchedulingPriority=99
+Nice=-20
+
+[Install]
+WantedBy=multi-user.target
+END
+
+systemctl enable MmsPiFobReader MmsPiW26Interface
 
 echo 'Install completed, reboot to start reader';
