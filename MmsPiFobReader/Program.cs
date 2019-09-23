@@ -553,10 +553,10 @@ Reader Id: {id}   Server: {serverAddress}
 					case '4':
 						switch (ReaderHardware.Type) {
 							case HardwareType.OrangePi:
-								Process.Start("bash", "-c \"cd /tmp; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh; chmod + x installOPi.sh; sudo ./installOPi.sh\"");
+								Process.Start("bash", "-c \"cd /tmp; rm -f installOPi.sh; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh; chmod +x installOPi.sh; sudo ./installOPi.sh\"");
 								break;
 							case HardwareType.RaspberryPi:
-								Process.Start("bash", "-c \"cd /tmp; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installRPi.sh; chmod + x installRPi.sh; sudo ./installRPi.sh\"");
+								Process.Start("bash", "-c \"cd /tmp; rm -f installRPi.sh; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installRPi.sh; chmod +x installRPi.sh; sudo ./installRPi.sh\"");
 								break;
 						}
 
