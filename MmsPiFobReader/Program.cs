@@ -199,7 +199,7 @@ namespace MmsPiFobReader
 							userEntryBuffer = "";
 							break;
 						case 'B':
-							ProcessCommand($"{userEntryBuffer}#");
+							ProcessCommand($"{userEntryBuffer}B");
 							userEntryBuffer = "";
 							break;
 						default:
@@ -359,6 +359,9 @@ namespace MmsPiFobReader
 			Draw.Prompt("Authenticating. . .");
 
 			AuthenticationResult newUser;
+
+			if (!key.StartsWith("W26#"))
+				key = key.Replace('B', '#');
 
 			try {
 				newUser = server.Authenticate(id, key);
