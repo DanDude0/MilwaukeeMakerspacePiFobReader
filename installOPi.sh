@@ -13,21 +13,25 @@ mkdir -p /opt/MmsPiW26Interface
 mkdir -p /opt/MmsPiFobReader
 
 # Set Reader Id
-while ! [[ $READERID =~ ^-?[0-9]+$ ]]
-do
-	heading 'Type the Reader Id you wish to set and press [ENTER]:'
-	read READERID
-done
+if [ ! -f /opt/MmsPiFobReader/readerid.txt ]
+	while ! [[ $READERID =~ ^-?[0-9]+$ ]]
+	do
+		heading 'Type the Reader Id you wish to set and press [ENTER]:'
+		read READERID
+	done
+fi
 
 echo $READERID > /opt/MmsPiFobReader/readerid.txt
 
 # Set Server
-heading '[Optional] If you wish you can hardcode the address of your API Server by typing it and pressing [ENTER]:\n+- If you wish to use SSDP just press [ENTER] without typing anything:'
-read SERVER
+if [ ! -f /opt/MmsPiFobReader/server.txt ]
+	heading '[Optional] If you wish you can hardcode the address of your API Server by typing it and pressing [ENTER]:\n+- If you wish to use SSDP just press [ENTER] without typing anything:'
+	read SERVER
 
-if [[ -n "${SERVER/[ ]*\n/}" ]]
-then
-	echo $SERVER > /opt/MmsPiFobReader/server.txt
+	if [[ -n "${SERVER/[ ]*\n/}" ]]
+	then
+		echo $SERVER > /opt/MmsPiFobReader/server.txt
+	fi
 fi
 
 # Work out of root user home
@@ -40,11 +44,12 @@ apt-get -y dist-upgrade
 
 # Install needed libraries
 heading 'Installing Libraries'
-apt-get -y install git libunwind8 busybox-syslogd ntp
+apt-get -y install git libunwind8 busybox-syslogd ntp libgpiod-dev gpiod
 
 # Remove unneeded libraries
 heading 'Removing Libraries'
 apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog
+apt-get autoremove
 
 # Setup Screen Hardware
 heading 'Setting Up Screen Hardware'
@@ -82,12 +87,12 @@ chmod +x build.sh
 
 # Install MmsPiFobReader
 heading 'Installer MmsPiFobReader'
-cd /opt/MmsPiFobReader
-rm -rfv *
 cd /tmp
+rm -rfv /opt/MmsPiFobReader/*
 curl -s https://api.github.com/repos/DanDude0/MilwaukeeMakerspacePiFobReader/releases/latest | grep -P "(?<=browser_download_url\": \")https://.*zip" -o | wget -i -
 unzip -o MmsPiFobReader.zip -d /opt/MmsPiFobReader
 rm -f MmsPiFobReader.zip
+chmod +x /opt/MmsPiFobReader/MmsPiFobReader
 
 # Install Systemd Unit
 heading 'Installing Systemd Units'
