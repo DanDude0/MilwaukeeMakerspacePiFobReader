@@ -27,7 +27,7 @@ namespace MmsPiFobReader
 			switch (Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					W26SysFs.Initalize();
+					W26Pipe.Initalize();
 					WiringPi.wiringPiSetup();
 					WiringPi.pinMode(9, 1); // Equipment Trigger, 1
 					WiringPi.pinMode(7, 1); // Equipment Trigger, 2
@@ -54,7 +54,7 @@ namespace MmsPiFobReader
 			switch (Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					return W26SysFs.Read();
+					return W26Pipe.Read();
 				default:
 					Thread.Sleep(5);
 
