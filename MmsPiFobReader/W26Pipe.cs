@@ -17,6 +17,11 @@ namespace MmsPiFobReader
 		private static IntPtr r;
 		private static int ret;
 		private static int fd;
+		private static string output;
+		private static int cursor;
+		private static int end;
+		private static int size;
+		private static byte[] buffer;
 
 		public static void Initalize()
 		{
@@ -30,30 +35,42 @@ namespace MmsPiFobReader
 
 			pfd[0].fd = fd;
 			pfd[0].events = POLLIN;
+			buffer = new byte[256];
 		}
 
 		public static string Read()
 		{
-			var buffer = "";
+			size = end - cursor;
 
-			ret = poll(pfd, 1, 5);
+			if (size < 1) {
+				ret = poll(pfd, 1, 5);
 
-			if (ret != 0) {
-				ret = (int)read(fd, r, 8);
+				if (ret != 0) {
+					ret = (int)read(fd, r, 256);
 
-				buffer = Marshal.PtrToStringAnsi(r, ret);
+					Marshal.Copy(r, buffer, 0, ret);
+
+					cursor = 0;
+					end = ret;
+					size = ret;
+				}
+
+				// Nothing to read
+				return "";
 			}
 
-			switch (buffer) {
-				case "A":
-					buffer = "*";
-					break;
-				case "B":
-					buffer = "#";
-					break;
+			if (buffer[cursor + 1] == '\n') {
+				// Keypress stacked up front
+				output = Encoding.ASCII.GetString(buffer, cursor, 1);
+				cursor += 2;
+			}
+			else {
+				// Fob stacked up front
+				output = Encoding.ASCII.GetString(buffer, cursor, 6);
+				cursor += 7;
 			}
 
-			return buffer;
+			return output;
 		}
 
 #pragma warning disable 649

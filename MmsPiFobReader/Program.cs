@@ -11,7 +11,7 @@ namespace MmsPiFobReader
 {
 	class Program
 	{
-		const string ServiceMenuMagicCode = "14725369#";
+		const string ServiceMenuMagicCode = "14725369B";
 
 		static MilwaukeeMakerspaceApiClient server;
 		static int id;
@@ -194,11 +194,11 @@ namespace MmsPiFobReader
 				}
 				else if (input.Length == 1) {
 					switch (input[0]) {
-						case '*':
+						case 'A':
 							Draw.Prompt("Enter PIN or swipe fob");
 							userEntryBuffer = "";
 							break;
-						case '#':
+						case 'B':
 							ProcessCommand($"{userEntryBuffer}#");
 							userEntryBuffer = "";
 							break;
@@ -232,7 +232,7 @@ namespace MmsPiFobReader
 			while (reader == null) {
 				var input = ReaderHardware.Read();
 
-				if (input == "*")
+				if (input == "A")
 					inputBuffer = "";
 				else
 					inputBuffer += input;
@@ -339,11 +339,11 @@ namespace MmsPiFobReader
 			if (command == ServiceMenuMagicCode) {
 				EnterServiceMenu(true);
 			}
-			else if (command == "#") {
+			else if (command == "B") {
 				// Do Nothing
 			}
 			// Force Logout
-			else if (command == "0#") {
+			else if (command == "0B") {
 				expiration = DateTime.Now - new TimeSpan(0, 0, 1);
 
 				Logout();
@@ -457,13 +457,13 @@ namespace MmsPiFobReader
 					continue;
 
 				switch (input[0]) {
-					case '*':
+					case 'A':
 						if (inputBuffer.Length > 0)
 							inputBuffer = inputBuffer.Substring(0, inputBuffer.Length - 1);
 
 						draw = true;
 						break;
-					case '#':
+					case 'B':
 						int.TryParse(inputBuffer, out var code);
 
 						if (cabinetItems.ContainsKey(code)) {
@@ -515,15 +515,15 @@ namespace MmsPiFobReader
 					Draw.Service($@"Version: {version}
 Hardware: {hardware}
 IP Address: {ip}
-Reader Id: {id}
-Server: {serverAddress}
+Reader Id: {id}   Server: {serverAddress}
 
 [1] Set Reader Id
 [2] Set Server
 [3] Test Cabinet Menu
-[4] Reboot Reader
-[5] Shutdown Reader
-[6] Exit Reader Application");
+[4] Update Reader
+[5] Reboot Reader
+[6] Shutdown Reader
+[7] Exit Reader Application");
 
 					draw = false;
 				}
@@ -534,7 +534,7 @@ Server: {serverAddress}
 					continue;
 
 				switch (input[0]) {
-					case '*':
+					case 'A':
 						Draw.MenuOverride = false;
 
 						if (reconnectOnExit)
@@ -551,14 +551,27 @@ Server: {serverAddress}
 						EnterCabinetMenu();
 						break;
 					case '4':
-						Process.Start("reboot");
+						switch (ReaderHardware.Type) {
+							case HardwareType.OrangePi:
+								Process.Start("bash", "-c \"cd /tmp; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh; chmod + x installOPi.sh; sudo ./installOPi.sh\"");
+								break;
+							case HardwareType.RaspberryPi:
+								Process.Start("bash", "-c \"cd /tmp; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installRPi.sh; chmod + x installRPi.sh; sudo ./installRPi.sh\"");
+								break;
+						}
+
+						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 					case '5':
-						Process.Start("shutdown", "-hP 0");
+						Process.Start("reboot");
 						Environment.Exit(0);
 						break;
 					case '6':
+						Process.Start("shutdown", "-hP 0");
+						Environment.Exit(0);
+						break;
+					case '7':
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
@@ -592,9 +605,9 @@ Reader Id: {inputBuffer}
 					continue;
 
 				switch (input[0]) {
-					case '*':
+					case 'A':
 						return;
-					case '#':
+					case 'B':
 						int.TryParse(inputBuffer, out id);
 						File.WriteAllText("readerid.txt", inputBuffer);
 						return;
@@ -636,7 +649,7 @@ Server: {complete}
 				draw = true;
 
 				switch (input[0]) {
-					case '*':
+					case 'A':
 						inputBuffer = "";
 
 						if (segments[currentSegment] != "x" && segments[currentSegment] != "_") {
@@ -653,7 +666,7 @@ Server: {complete}
 						else
 							return;
 						break;
-					case '#':
+					case 'B':
 						inputBuffer = "";
 
 						if (segments[currentSegment] == "x" && segments[currentSegment] == "_") {

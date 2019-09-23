@@ -14,14 +14,13 @@ namespace MmsPiFobReader
 
 		private static Screen screen = new Screen();
 		private static FontFamily arial = new FontCollection().Install("LiberationSans-Regular.ttf");
-		private static Font hugeFont = new Font(arial, 120f, FontStyle.Regular);
-		private static Font bigFont = new Font(arial, 56f, FontStyle.Regular);
-		private static Font littleFont = new Font(arial, 45f, FontStyle.Regular);
-		private static Font smallerFont = new Font(arial, 42f, FontStyle.Regular);
-		private static Font tinyFont = new Font(arial, 31f, FontStyle.Regular);
-		private static Font entFont = new Font(arial, 24f, FontStyle.Regular);
-		private static Font microFont = new Font(arial, 23f, FontStyle.Regular);
-		private static Font nanoFont = new Font(arial, 21f, FontStyle.Regular);
+		private static Font hugeFont = new Font(arial, 120, FontStyle.Regular);
+		private static Font bigFont = new Font(arial, 56, FontStyle.Regular);
+		private static Font littleFont = new Font(arial, 45, FontStyle.Regular);
+		private static Font smallerFont = new Font(arial, 42, FontStyle.Regular);
+		private static Font tinyFont = new Font(arial, 31, FontStyle.Regular);
+		private static Font entFont = new Font(arial, 24, FontStyle.Regular);
+		private static Font microFont = new Font(arial, 23, FontStyle.Regular);
 		private static Color black = Color.FromRgb(0, 0, 0);
 		private static Color white = Color.FromRgb(255, 255, 255);
 		private static Color red = Color.FromRgb(255, 26, 26);

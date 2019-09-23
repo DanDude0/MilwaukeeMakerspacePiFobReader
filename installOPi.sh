@@ -113,7 +113,7 @@ ExecStart=/opt/MmsPiFobReader/MmsPiFobReader
 KillMode=process
 Restart=always
 User=root
-CPUAffinity=1 2
+CPUAffinity=0 1 2
 
 [Install]
 WantedBy=multi-user.target

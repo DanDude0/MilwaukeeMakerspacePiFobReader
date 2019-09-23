@@ -67,10 +67,10 @@ namespace MmsPiFobReader
 							case SDL.SDL_Keycode.SDLK_HASH:
 							case SDL.SDL_Keycode.SDLK_RETURN:
 							case SDL.SDL_Keycode.SDLK_RETURN2:
-								return "#";
+								return "B";
 							case SDL.SDL_Keycode.SDLK_ASTERISK:
 							case SDL.SDL_Keycode.SDLK_BACKSPACE:
-								return "*";
+								return "A";
 							case SDL.SDL_Keycode.SDLK_ESCAPE:
 								Environment.Exit(0);
 								break;

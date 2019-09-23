@@ -76,11 +76,11 @@ int main(int argc, char **argv)
 			if (quietCount > 2 && bitCount > 0) {
 				if (bitCount == 8) {
 					buffer &= 0xF;
-					dprintf(pipe, "%X", buffer);
+					dprintf(pipe, "%X\n", buffer);
 				}
 				else if (bitCount == 26) {
 					buffer >>= 1;
-					dprintf(pipe, "%06X", buffer);
+					dprintf(pipe, "%06X\n", buffer);
 				}
 
 				quietCount = 0;
