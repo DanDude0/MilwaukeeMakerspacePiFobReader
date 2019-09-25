@@ -188,7 +188,7 @@ namespace MmsPiFobReader
 					}
 				}
 
-				if (input.Length == 8) {
+				if (input.Length == 6) {
 					ProcessCommand($"W26#{input}");
 					userEntryBuffer = "";
 				}
