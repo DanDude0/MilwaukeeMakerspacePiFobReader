@@ -83,16 +83,19 @@ namespace MmsPiFobReader
 			switch (ReaderHardware.Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
+					// This is a sort of double buffering to make up for low device frame rate.
 					lock (frameLock) {
-						if (currentFrame == null)
+						if (currentFrame == null) {
 							currentFrame = bytes;
+
+							var thread = new Thread(DrawThread);
+							thread.Start();
+						}
 						else {
 							pendingFrame = bytes;
 						}
 					}
 
-					var thread = new Thread(DrawThread);
-					thread.Start();
 					break;
 				default:
 					// This code is seriously bloated and could almost certainly be faster, but it just needs to be good enough for debugging.
