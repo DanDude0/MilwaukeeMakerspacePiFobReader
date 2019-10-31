@@ -11,7 +11,7 @@ namespace MmsPiFobReader
 {
 	class Program
 	{
-		const string ServiceMenuMagicCode = "14725369B";
+		const string ServiceMenuMagicCode = "14725369";
 
 		static MilwaukeeMakerspaceApiClient server;
 		static int id;
@@ -188,8 +188,8 @@ namespace MmsPiFobReader
 					}
 				}
 
-				if (input.Length == 6) {
-					ProcessCommand($"W26#00{input}");
+				if (input.Length == 8) {
+					ProcessCommand($"W26#{input}");
 					userEntryBuffer = "";
 				}
 				else if (input.Length == 1) {
@@ -199,7 +199,7 @@ namespace MmsPiFobReader
 							userEntryBuffer = "";
 							break;
 						case 'B':
-							ProcessCommand($"{userEntryBuffer}B");
+							ProcessCommand(userEntryBuffer);
 							userEntryBuffer = "";
 							break;
 						default:
@@ -226,7 +226,7 @@ namespace MmsPiFobReader
 			var connectingThread = new Thread(ConnectThread);
 			connectingThread.Start();
 
-			// Spin the foreground thread to collect and throw away any user input while we are connecting.
+			// Spin the foreground thread to collect and throw away any user input while we are connecting. Also allow people to access the service menu if they need to.
 			var inputBuffer = "";
 
 			while (reader == null) {
@@ -234,14 +234,17 @@ namespace MmsPiFobReader
 
 				if (input == "A")
 					inputBuffer = "";
+				else if (input == "B") {
+					if (inputBuffer == ServiceMenuMagicCode) {
+						inputBuffer = "";
+
+						EnterServiceMenu();
+					}
+					else
+						inputBuffer = "";
+				}
 				else
 					inputBuffer += input;
-
-				if (inputBuffer == ServiceMenuMagicCode) {
-					inputBuffer = "";
-
-					EnterServiceMenu(false);
-				}
 			}
 
 			inputCleared = true;
@@ -273,6 +276,8 @@ namespace MmsPiFobReader
 					Log.Exception(ex);
 
 					Draw.Fatal("Reader ID is not set");
+
+					Thread.Sleep(60000);
 				}
 
 				try {
@@ -282,7 +287,10 @@ namespace MmsPiFobReader
 				catch (Exception ex) {
 					Log.Exception(ex);
 
-					Draw.Fatal("Cannot reach server");
+					var ip = MilwaukeeMakerspaceApiClient.GetLocalIp4Address();
+					Draw.Fatal($"Cannot reach server\nReader IP: {ip}");
+
+					Thread.Sleep(20000);
 				}
 
 				try {
@@ -327,9 +335,9 @@ namespace MmsPiFobReader
 					Log.Exception(ex);
 
 					Draw.Fatal("Server does not recognise reader ID");
-				}
 
-				Thread.Sleep(2000);
+					Thread.Sleep(10000);
+				}
 			}
 		}
 
@@ -337,13 +345,15 @@ namespace MmsPiFobReader
 		{
 			// Empty Input
 			if (command == ServiceMenuMagicCode) {
-				EnterServiceMenu(true);
+				EnterServiceMenu();
+
+				Connect();
 			}
-			else if (command == "B") {
+			else if (command == "") {
 				// Do Nothing
 			}
 			// Force Logout
-			else if (command == "0B") {
+			else if (command == "0") {
 				expiration = DateTime.Now - new TimeSpan(0, 0, 1);
 
 				Logout();
@@ -361,7 +371,7 @@ namespace MmsPiFobReader
 			AuthenticationResult newUser;
 
 			if (!key.StartsWith("W26#"))
-				key = key.Replace('B', '#');
+				key += '#';
 
 			try {
 				newUser = server.Authenticate(id, key);
@@ -495,7 +505,7 @@ namespace MmsPiFobReader
 			}
 		}
 
-		static void EnterServiceMenu(bool reconnectOnExit)
+		static void EnterServiceMenu()
 		{
 			Draw.MenuOverride = true;
 
@@ -540,8 +550,7 @@ Reader Id: {id}   Server: {serverAddress}
 					case 'A':
 						Draw.MenuOverride = false;
 
-						if (reconnectOnExit)
-							Connect();
+						Draw.Loading("Reconnecting");
 
 						return;
 					case '1':

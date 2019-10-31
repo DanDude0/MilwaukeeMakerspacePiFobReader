@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 				}
 				else if (bitCount == 26) {
 					buffer >>= 1;
-					dprintf(pipe, "%06X\n", buffer);
+					dprintf(pipe, "%08X\n", buffer);
 				}
 
 				quietCount = 0;

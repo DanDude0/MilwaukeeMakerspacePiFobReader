@@ -66,8 +66,8 @@ namespace MmsPiFobReader
 			}
 			else {
 				// Fob stacked up front
-				output = Encoding.ASCII.GetString(buffer, cursor, 6);
-				cursor += 7;
+				output = Encoding.ASCII.GetString(buffer, cursor, 8);
+				cursor += 9;
 			}
 
 			return output;
