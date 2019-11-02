@@ -447,6 +447,15 @@ namespace MmsPiFobReader
 			var draw = true;
 			var inputBuffer = "";
 
+			if (cabinetItems == null) {
+				Draw.MenuOverride = false;
+				Draw.Fatal("Could not load cabinet items");
+
+				Thread.Sleep(2000);
+
+				return;
+			}
+
 			Draw.MenuOverride = true;
 
 			while (true) {
@@ -507,8 +516,6 @@ namespace MmsPiFobReader
 
 		static void EnterServiceMenu()
 		{
-			Draw.MenuOverride = true;
-
 			var version = File.GetCreationTime("MmsPiFobReader.dll");
 			var hardware = "SDL";
 
@@ -525,6 +532,7 @@ namespace MmsPiFobReader
 					serverAddress = File.ReadAllText("server.txt").Replace("\n", "");
 
 				if (draw) {
+					Draw.MenuOverride = true;
 					Draw.Service($@"Version: {version}
 Hardware: {hardware}
 IP Address: {ip}
