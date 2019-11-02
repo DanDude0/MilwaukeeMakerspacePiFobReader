@@ -111,29 +111,34 @@ namespace MmsPiFobReader
 
 		public static string GetLocalIp4Address()
 		{
-			var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
+			try {
+				var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
 
-			foreach (var network in networkInterfaces) {
-				if (network.OperationalStatus != OperationalStatus.Up)
-					continue;
-
-				var properties = network.GetIPProperties();
-
-				if (properties.GatewayAddresses.Count == 0)
-					continue;
-
-				foreach (var address in properties.UnicastAddresses) {
-					if (address.Address.AddressFamily != AddressFamily.InterNetwork)
+				foreach (var network in networkInterfaces) {
+					if (network.OperationalStatus != OperationalStatus.Up)
 						continue;
 
-					if (IPAddress.IsLoopback(address.Address))
+					var properties = network.GetIPProperties();
+
+					if (properties.GatewayAddresses.Count == 0)
 						continue;
 
-					return address.Address.ToString();
+					foreach (var address in properties.UnicastAddresses) {
+						if (address.Address.AddressFamily != AddressFamily.InterNetwork)
+							continue;
+
+						if (IPAddress.IsLoopback(address.Address))
+							continue;
+
+						return address.Address.ToString();
+					}
 				}
 			}
+			catch {
+				// Do Nothing
+			}
 
-			throw new Exception("No IP Address Found for SSDP");
+			return "127.0.0.1";
 		}
 	}
 }
