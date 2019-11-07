@@ -84,6 +84,8 @@ cd /opt/MmsPiW26Interface
 rm -rfv *
 wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/MmsPiW26Interface.cpp
 wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/build.sh
+sed 's/d0Line = 29;/d0Line = 199;/g' MmsPiW26Interface.cpp
+sed 's/d0Line = 28;/d0Line = 198;/g' MmsPiW26Interface.cpp
 chmod +x build.sh
 ./build.sh
 
