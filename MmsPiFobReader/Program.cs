@@ -533,8 +533,7 @@ namespace MmsPiFobReader
 Uptime: {status.Uptime}
 Hardware: {status.Hardware}
 IP Address: {status.Ip}
-Reader Id: {status.Id}
-Server: {status.Server}
+Reader Id: {status.Id}     Server: {status.Server}
 
 [1] Set Reader Id	[2] Set Server
 [3] Test Cabinet Menu
