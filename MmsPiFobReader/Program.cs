@@ -530,8 +530,8 @@ namespace MmsPiFobReader
 				if (draw) {
 					Draw.MenuOverride = true;
 					Draw.Service($@"Version: {status.Version}
-Uptime: {status.Uptime}
-Hardware: {status.Hardware}
+Uptime: [{status.Uptime}]
+Hardware: [{status.Hardware}]
 IP Address: {status.Ip}
 Reader Id: {status.Id}
 Server: {status.Server}
