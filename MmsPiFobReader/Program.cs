@@ -13,16 +13,21 @@ namespace MmsPiFobReader
 	{
 		const string ServiceMenuMagicCode = "14725369";
 
+		// Set at Initialization
+		static readonly ReaderStatus status = new ReaderStatus();
 		static MilwaukeeMakerspaceApiClient server;
-		static int id;
-		static DateTime expiration = DateTime.MinValue;
-		static AuthenticationResult user;
-		static ReaderResult reader;
-		static JObject settings;
+		static ReaderResult config;
+
+		// Populated from config settings
 		static bool cabinetMode;
 		static Dictionary<int, string> cabinetItems;
 		static bool warningBeep;
 		static bool inputCleared;
+
+		// Set on login
+		static string key;
+		static AuthenticationResult user;
+		static DateTime expiration = DateTime.MinValue;
 
 		// With all due respect to Sim City!
 		static string[] loadingMessages =
@@ -143,6 +148,7 @@ namespace MmsPiFobReader
 			var lastEntry = DateTime.MinValue;
 			var seconds = -1;
 
+			UpdateStatus();
 			Connect();
 
 			// Main activity loop
@@ -218,9 +224,9 @@ namespace MmsPiFobReader
 
 		static void Connect()
 		{
-			id = 0;
+			status.Id = 0;
 			server = null;
-			reader = null;
+			config = null;
 
 			// Use a background thread to do the connect to avoid stalling UI
 			var connectingThread = new Thread(ConnectThread);
@@ -229,7 +235,7 @@ namespace MmsPiFobReader
 			// Spin the foreground thread to collect and throw away any user input while we are connecting. Also allow people to access the service menu if they need to.
 			var inputBuffer = "";
 
-			while (reader == null) {
+			while (config == null) {
 				var input = ReaderHardware.Read();
 
 				if (input == "A")
@@ -248,13 +254,13 @@ namespace MmsPiFobReader
 			}
 
 			inputCleared = true;
-			Draw.Heading(reader.Name);
+			Draw.Heading(config.Name);
 			Draw.Status(-1, false);
 			Logout();
 
 			if (user != null)
 				Draw.User(user);
-			else if (reader.Enabled)
+			else if (config.Enabled)
 				Draw.Prompt("Enter PIN or swipe fob");
 			else
 				Draw.Prompt("Login has been disabled");
@@ -270,7 +276,7 @@ namespace MmsPiFobReader
 				Draw.Loading(message);
 
 				try {
-					id = int.Parse(File.ReadAllText("readerid.txt"));
+					status.Id = int.Parse(File.ReadAllText("readerid.txt"));
 				}
 				catch (Exception ex) {
 					Log.Exception(ex);
@@ -281,28 +287,27 @@ namespace MmsPiFobReader
 				}
 
 				try {
-					if (id != 0)
-						server = new MilwaukeeMakerspaceApiClient();
+					if (status.Id != 0)
+						server = new MilwaukeeMakerspaceApiClient(status);
 				}
 				catch (Exception ex) {
 					Log.Exception(ex);
 
-					var ip = MilwaukeeMakerspaceApiClient.GetLocalIp4Address();
-					Draw.Fatal($"Cannot reach server\nReader IP: {ip}");
+					Draw.Fatal($"Cannot reach server\nReader IP: {status.Ip}");
 
 					Thread.Sleep(20000);
 				}
 
 				try {
 					if (server != null) {
-						reader = server.ReaderLookup(id);
+						config = server.Initialize();
 
 						cabinetMode = false;
 						warningBeep = true;
 						cabinetItems?.Clear();
 
 						try {
-							settings = JObject.Parse(reader.Settings);
+							var settings = JObject.Parse(config.Settings);
 
 							cabinetMode = settings?["mode"]?.ToString() == "cabinet";
 							warningBeep = (bool?)settings?["warn"] ?? true;
@@ -364,17 +369,17 @@ namespace MmsPiFobReader
 			}
 		}
 
-		static void Login(string key)
+		static void Login(string keyIn)
 		{
 			Draw.Prompt("Authenticating. . .");
 
 			AuthenticationResult newUser;
 
-			if (!key.StartsWith("W26#"))
-				key += '#';
+			if (!keyIn.StartsWith("W26#"))
+				keyIn += '#';
 
 			try {
-				newUser = server.Authenticate(id, key);
+				newUser = server.Authenticate(keyIn);
 			}
 			catch (Exception ex) {
 				Log.Exception(ex);
@@ -398,15 +403,16 @@ namespace MmsPiFobReader
 			}
 
 			inputCleared = true;
+			key = keyIn;
 			user = newUser;
 
 			if (cabinetMode) {
 				EnterCabinetMenu();
 			}
 			else {
-				expiration = DateTime.Now + new TimeSpan(0, 0, reader.Timeout);
+				expiration = DateTime.Now + new TimeSpan(0, 0, config.Timeout);
 
-				Draw.Status(reader.Timeout, false);
+				Draw.Status(config.Timeout, false);
 				Draw.User(user);
 				ReaderHardware.Login();
 			}
@@ -425,7 +431,7 @@ namespace MmsPiFobReader
 				ReaderHardware.Logout();
 
 			try {
-				server.Logout(id);
+				server.Logout(key);
 			}
 			catch (Exception ex) {
 				Log.Exception(ex);
@@ -492,9 +498,9 @@ namespace MmsPiFobReader
 							var item = cabinetItems[code];
 
 							Draw.MenuOverride = false;
-							Draw.Heading(reader.Name);
+							Draw.Heading(config.Name);
 							Draw.Prompt($"Selected: {item}");
-							server.Action(id, item);
+							server.Action(key, item);
 							ReaderHardware.Output(code);
 							Thread.Sleep(400);
 							ReaderHardware.Output(0);
@@ -516,35 +522,26 @@ namespace MmsPiFobReader
 
 		static void EnterServiceMenu()
 		{
-			var version = File.GetCreationTime("MmsPiFobReader.dll");
-			var hardware = "SDL";
+			UpdateStatus();
 
-			if (File.Exists("/proc/device-tree/model"))
-				hardware = File.ReadAllText("/proc/device-tree/model");
-
-			var ip = MilwaukeeMakerspaceApiClient.GetLocalIp4Address();
 			var draw = true;
 
 			while (true) {
-				var serverAddress = server?.Server;
-
-				if (serverAddress == null && File.Exists("server.txt"))
-					serverAddress = File.ReadAllText("server.txt").Replace("\n", "");
-
 				if (draw) {
 					Draw.MenuOverride = true;
-					Draw.Service($@"Version: {version}
-Hardware: {hardware}
-IP Address: {ip}
-Reader Id: {id}   Server: {serverAddress}
+					Draw.Service($@"Version: {status.Version}
+Uptime: {status.Uptime}
+Hardware: {status.Hardware}
+IP Address: {status.Ip}
+Reader Id: {status.Id}
+Server: {status.Server}
 
-[1] Set Reader Id
-[2] Set Server
+[1] Set Reader Id	[2] Set Server
 [3] Test Cabinet Menu
-[4] Update Reader
-[5] Reboot Reader
+[4] Update Reader	[5] Reboot Reader
 [6] Shutdown Reader
 [7] Exit Reader Application");
+
 
 					draw = false;
 				}
@@ -633,8 +630,13 @@ Reader Id: {inputBuffer}
 					case 'A':
 						return;
 					case 'B':
-						int.TryParse(inputBuffer, out id);
-						File.WriteAllText("readerid.txt", inputBuffer);
+						int.TryParse(inputBuffer, out var id);
+
+						if (id > 0) {
+							status.Id = id;
+							File.WriteAllText("readerid.txt", inputBuffer);
+						}
+
 						return;
 					default:
 						inputBuffer += input;
@@ -713,6 +715,42 @@ Server: {complete}
 						segments[currentSegment] = inputBuffer;
 						break;
 				}
+			}
+		}
+
+		static void UpdateStatus()
+		{
+			status.Version = File.GetCreationTime("MmsPiFobReader.dll").ToString();
+			status.Hardware = "SDL";
+
+			if (File.Exists("/proc/device-tree/model"))
+				status.Hardware = File.ReadAllText("/proc/device-tree/model");
+
+			if (File.Exists("/etc/armbian-release"))
+				status.Os = File.ReadAllText("/etc/armbian-release");
+
+			status.Kernel = GetCommandOutput("uname", "-a");
+			status.Uptime = GetCommandOutput("uptime", "");
+		}
+
+		static string GetCommandOutput(string command, string arguements)
+		{
+			try {
+				var cliProcess = new Process() {
+					StartInfo = new ProcessStartInfo(command, arguements) {
+						UseShellExecute = false,
+						RedirectStandardOutput = true
+					}
+				};
+				cliProcess.Start();
+				var cliOut = cliProcess.StandardOutput.ReadToEnd();
+				cliProcess.WaitForExit(100);
+				cliProcess.Close();
+
+				return cliOut;
+			}
+			catch {
+				return "";
 			}
 		}
 	}

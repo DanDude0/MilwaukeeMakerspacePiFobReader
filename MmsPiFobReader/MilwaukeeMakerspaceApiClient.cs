@@ -12,55 +12,88 @@ namespace MmsPiFobReader
 {
 	class MilwaukeeMakerspaceApiClient
 	{
-		public string Server { get; private set; }
+		ReaderStatus status;
 
-		public MilwaukeeMakerspaceApiClient()
+		private HttpClient client;
+
+		public MilwaukeeMakerspaceApiClient(ReaderStatus statusIn)
 		{
+			status = statusIn;
+			status.Ip = GetLocalIp4Address();
+
 			// SSDP Not working? Use override file
 			if (File.Exists("server.txt"))
-				Server = File.ReadAllText("server.txt").Replace("\n", "");
+				status.Server = File.ReadAllText("server.txt").Replace("\n", "");
 			else
 				SearchForServer();
 
-			var client = GetClient();
+			client = GetClient();
 
+			// Check if server is responding
 			var unused = client.GetStringAsync($"/").Result;
 		}
 
-		public ReaderResult ReaderLookup(int id)
+		public ReaderResult Initialize()
 		{
-			var client = GetClient();
-			var result = client.GetStringAsync($"reader/lookup/{id}").Result;
+			var request = new StringContent(JsonConvert.SerializeObject(status));
+			var result = client.PostAsync($"reader/initialize", request).Result;
 
-			return JsonConvert.DeserializeObject<ReaderResult>(result);
+			result.EnsureSuccessStatusCode();
+
+			return JsonConvert.DeserializeObject<ReaderResult>(result.Content.ReadAsStringAsync().Result) ;
 		}
 
-		public AuthenticationResult Authenticate(int id, string key)
+		public AuthenticationResult Authenticate(string key)
 		{
-			var client = GetClient();
-			var result = client.GetStringAsync($"authenticate/json/{id}/{Uri.EscapeDataString(key)}").Result;
-			
-			return JsonConvert.DeserializeObject<AuthenticationResult>(result);
+			var action = new ActionRequest {
+				Id = status.Id,
+				Key = key,
+				Type = "Login",
+				Action = ""
+			};
+
+			var request = new StringContent(JsonConvert.SerializeObject(action));
+			var result = client.PostAsync($"reader/action", request).Result;
+
+			result.EnsureSuccessStatusCode();
+
+			return JsonConvert.DeserializeObject<AuthenticationResult>(result.Content.ReadAsStringAsync().Result);
 		}
 
-		public void Logout(int id)
+		public void Logout(string key)
 		{
-			var client = GetClient();
+			var action = new ActionRequest {
+				Id = status.Id,
+				Key = key,
+				Type = "Logout",
+				Action = ""
+			};
 
-			client.GetAsync($"authenticate/logout/{id}/").Result.EnsureSuccessStatusCode();
+			var request = new StringContent(JsonConvert.SerializeObject(action));
+			var result = client.PostAsync($"reader/action", request).Result;
+
+			result.EnsureSuccessStatusCode();
 		}
 
-		public void Action(int id, string details)
+		public void Action(string key, string details)
 		{
-			var client = GetClient();
+			var action = new ActionRequest {
+				Id = status.Id,
+				Key = key,
+				Type = "Action",
+				Action = details
+			};
 
-			client.GetAsync($"authenticate/action/{id}/{Uri.EscapeDataString(details)}").Result.EnsureSuccessStatusCode();
+			var request = new StringContent(JsonConvert.SerializeObject(action));
+			var result = client.PostAsync($"reader/action", request).Result;
+
+			result.EnsureSuccessStatusCode();
 		}
 
 		private HttpClient GetClient()
 		{
 			var client = new HttpClient();
-			client.BaseAddress = new Uri($"http://{Server}/");
+			client.BaseAddress = new Uri($"http://{status.Server}/");
 			client.Timeout = new TimeSpan(0, 0, 5);
 
 			return client;
@@ -88,7 +121,7 @@ namespace MmsPiFobReader
 				deviceLocator.StartListeningForNotifications();
 
 				for (int i = 0; i < 20; i += 1) {
-					if (!string.IsNullOrEmpty(Server))
+					if (!string.IsNullOrEmpty(status.Server))
 						// We found a server, let the constructor continue
 						return;
 
@@ -106,10 +139,10 @@ namespace MmsPiFobReader
 		private void FoundDevice(object sender, DeviceAvailableEventArgs e)
 		{
 			if (e.DiscoveredDevice.Usn.Contains("6111f321-2cee-455e-b203-4abfaf14b516"))
-				Server = e.DiscoveredDevice.DescriptionLocation.Host;
+				status.Server = e.DiscoveredDevice.DescriptionLocation.Host;
 		}
 
-		public static string GetLocalIp4Address()
+		private static string GetLocalIp4Address()
 		{
 			try {
 				var networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
