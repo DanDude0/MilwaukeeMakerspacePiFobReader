@@ -384,8 +384,8 @@ namespace MmsPiFobReader
 			catch (Exception ex) {
 				Log.Exception(ex);
 
-				switch (ex.InnerException) {
-					case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
+				switch (ex) {
+					case HttpRequestException e when e.Message.Contains("403 (Forbidden)"):
 						Draw.Prompt("Invalid key");
 						break;
 					default:
