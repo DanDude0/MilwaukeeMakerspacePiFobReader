@@ -50,7 +50,7 @@ apt-get -y install git libunwind8 busybox-syslogd ntp libgpiod-dev gpiod
 
 # Remove unneeded libraries
 heading 'Removing Libraries'
-apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog
+apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog apt-listchanges
 apt-get -y autoremove
 
 # Setup Screen Hardware
@@ -85,7 +85,7 @@ rm -rfv *
 wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/MmsPiW26Interface.cpp
 wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/MmsPiW26Interface/build.sh
 sed -i 's/d0Line = 21;/d0Line = 199;/g' MmsPiW26Interface.cpp
-sed -i 's/d0Line = 20;/d0Line = 198;/g' MmsPiW26Interface.cpp
+sed -i 's/d1Line = 20;/d1Line = 198;/g' MmsPiW26Interface.cpp
 chmod +x build.sh
 ./build.sh
 
