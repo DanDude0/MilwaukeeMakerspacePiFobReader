@@ -39,6 +39,11 @@ fi
 # Work out of root user home
 cd /root
 
+# Remove unneeded libraries
+heading 'Removing Libraries'
+apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog apt-listchanges
+apt-get -y autoremove
+
 # Update the OS
 heading 'Updating Operating System'
 apt-get -y update
@@ -47,11 +52,6 @@ apt-get -y dist-upgrade
 # Install needed libraries
 heading 'Installing Libraries'
 apt-get -y install git libunwind8 busybox-syslogd ntp libgpiod-dev gpiod
-
-# Remove unneeded libraries
-heading 'Removing Libraries'
-apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog apt-listchanges
-apt-get -y autoremove
 
 # Setup Screen Hardware
 heading 'Setting Up Screen Hardware'
