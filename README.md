@@ -12,14 +12,14 @@ Get the installer here:
 Be sure to select the `.Net Core cross-platform development` workload.
 
 #### Alternate - Just install the necessary SDKs
-Get the installer for the .Net Core 2.1 SDK here:
+Get the installer for the .Net Core 3.1 SDK here:
 
-<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-2.1.500-windows-x64-installer>
+<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-3.1.100-windows-x64-installer>
 
 ### Mac
-Get the installer for the .Net Core 2.1 SDK here:
+Get the installer for the .Net Core 3.1 SDK here:
 
-<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-2.1.500-macos-x64-installer>
+<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-3.1.100-macos-x64-installer>
 
 Install the SDL2 library:
 	
@@ -28,7 +28,7 @@ Install the SDL2 library:
 ### Linux
 Instructions good for anything Debian/Ubuntu based. Translating for other package managers of your choice should be trivial:
 
-Install .Net Core 2.1 SDK:
+Install .Net Core 3.1 SDK:
 
 Directions from here:
 
@@ -42,7 +42,7 @@ Directions from here:
 	chown root:root /etc/apt/sources.list.d/microsoft-prod.list
 
 	apt-get update
-	apt-get install dotnet-sdk-2.1
+	apt-get install dotnet-sdk-3.1
 
 Install the SDL2 library:
 	
@@ -205,7 +205,7 @@ Download and run the install script:
 	chmod +x installRPi.sh
 	sudo ./installRPi.sh
 	
-Follow the directions on screen. This install will take a LONG time, probably over 10 minutes. Once you've successfully made one reader, I highly suggest cloning the SD card to make subsequent readers, it will go much faster. All you need to change is the readerid.txt file for every new reader.
+Follow the directions on screen. This install can take a LONG time, probably over 10 minutes. Once you've successfully made one reader, I highly suggest cloning the SD card to make subsequent readers, it will go much faster. All you need to change is the readerid.txt file for every new reader.
 
 If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
 
@@ -257,7 +257,7 @@ Download and run the install script:
 	chmod +x installOPi.sh
 	sudo ./installOPi.sh
 	
-Follow the directions on screen. This install will take a LONG time, probably over 10 minutes. Once you've successfully made one reader, I highly suggest cloning the SD card to make subsequent readers, it will go much faster. All you need to change is the readerid.txt file for every new reader.
+Follow the directions on screen. This install can take a LONG time, probably over 10 minutes. Once you've successfully made one reader, I highly suggest cloning the SD card to make subsequent readers, it will go much faster. All you need to change is the readerid.txt file for every new reader.
 
 If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
 	
