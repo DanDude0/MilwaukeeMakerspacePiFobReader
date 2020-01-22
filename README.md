@@ -7,7 +7,7 @@ This is pretty easy to do on any common desktop platform:
 #### Recommended - Install the full Visual Studio IDE for a nice development experince
 Get the installer here:
 
-<https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=15>
+<https://visualstudio.microsoft.com/thank-you-downloading-visual-studio/?sku=Community&rel=16>
 
 Be sure to select the `.Net Core cross-platform development` workload.
 
@@ -46,7 +46,7 @@ Directions from here:
 
 Install the SDL2 library:
 	
-	apt install libsdl2-2.0-0
+	apt-get install libsdl2-2.0-0
 
 ### Now lets run the damn thing already
 
