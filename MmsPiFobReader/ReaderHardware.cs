@@ -114,6 +114,9 @@ namespace MmsPiFobReader
 					if (string.IsNullOrEmpty(output))
 						output = serialPort.ReadExisting();
 
+					if (!string.IsNullOrEmpty(output))
+						Console.WriteLine($"Received raw input [{output.Length}]: {output} {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(output))}");
+
 					return output;
 				default:
 					Thread.Sleep(5);

@@ -198,6 +198,13 @@ namespace MmsPiFobReader
 					ProcessCommand($"W26#{input}");
 					userEntryBuffer = "";
 				}
+				else if (input.Length > 10 && input[0] == 0x2 ) {
+					// Detect and chop off start/stop bytes from an RS232 reader
+					input = input.Substring(1, 10);
+
+					ProcessCommand(input);
+					userEntryBuffer = "";
+				}
 				else if (input.Length == 1) {
 					switch (input[0]) {
 						case 'A':
@@ -218,6 +225,9 @@ namespace MmsPiFobReader
 							Draw.Entry("".PadLeft(count, '*'));
 							break;
 					}
+				}
+				else if (input.Length > 0) {
+					Console.WriteLine($"Received input unknown [{input.Length}]: {input} {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(input))}");
 				}
 			}
 		}
@@ -374,9 +384,6 @@ namespace MmsPiFobReader
 			Draw.Prompt("Authenticating. . .");
 
 			AuthenticationResult newUser;
-
-			if (!keyIn.StartsWith("W26#"))
-				keyIn += '#';
 
 			try {
 				newUser = server.Authenticate(keyIn);
