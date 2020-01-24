@@ -1,5 +1,8 @@
 using System;
+using System.Device.Gpio;
+using System.Device.Gpio.Drivers;
 using System.IO;
+using System.IO.Ports;
 using System.Threading;
 using SDL2;
 
@@ -8,6 +11,23 @@ namespace MmsPiFobReader
 	static class ReaderHardware
 	{
 		public static HardwareType Type { get; private set; }
+
+		private static SerialPort serialPort;
+		private static GpioController gpio;
+
+		private static int address0Pin = 0;
+		private static int address1Pin = 0;
+		private static int address2Pin = 0;
+		private static int address3Pin = 0;
+		private static int address4Pin = 0;
+		private static int address5Pin = 0;
+		private static int address6Pin = 0;
+		private static int address7Pin = 0;
+
+		private static int triggerPin = 0;
+
+		private static int ledPin = 0;
+		private static int beeperPin = 0;
 
 		public static void Initialize()
 		{
@@ -26,23 +46,58 @@ namespace MmsPiFobReader
 
 			switch (Type) {
 				case HardwareType.OrangePi:
+					serialPort = new SerialPort("/dev/ttyS3", 9600, Parity.None, 8, StopBits.One);
+
+					address0Pin = 3;
+					address1Pin = 4;
+					address2Pin = 27;
+					address3Pin = 22;
+					address4Pin = 5;
+					address5Pin = 6;
+					address6Pin = 19;
+					address7Pin = 26;
+					triggerPin = 13;
+					ledPin = 12;
+					beeperPin = 16;
+					break;
+				case HardwareType.RaspberryPi:
+					serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One);
+
+					address0Pin = 3;
+					address1Pin = 4;
+					address2Pin = 27;
+					address3Pin = 22;
+					address4Pin = 5;
+					address5Pin = 6;
+					address6Pin = 19;
+					address7Pin = 26;
+					triggerPin = 13;
+					ledPin = 12;
+					beeperPin = 16;
+					break;
+			}
+
+			switch (Type) {
+				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					W26Pipe.Initalize();
-					WiringPi.wiringPiSetup();
-					WiringPi.pinMode(9, 1); // Equipment Trigger, 1
-					WiringPi.pinMode(7, 1); // Equipment Trigger, 2
-					WiringPi.pinMode(15, 1); // Equipment Trigger, 3
-					WiringPi.pinMode(16, 1); // Equipment Trigger, 4
-					WiringPi.pinMode(2, 1); // Equipment Trigger, 5
-					WiringPi.pinMode(3, 1); // Equipment Trigger, 6
-					WiringPi.pinMode(4, 1); // Equipment Trigger, 7
-					WiringPi.pinMode(21, 1); // Equipment Trigger, 8
-					WiringPi.pinMode(22, 1); // Logged in enable, Equipment Trigger, 9
-					WiringPi.pinMode(23, 1); // Logged in enable, Equipment Trigger, 10
-					WiringPi.pinMode(24, 1); // Logged in disable, Equipment Trigger, 11
-					WiringPi.pinMode(25, 1); // Logged in disable, Equipment Trigger, 12
-					WiringPi.pinMode(26, 1); // LED 
-					WiringPi.pinMode(27, 1); // Beeper
+
+					serialPort.Open();
+
+					var driver = new LibGpiodDriver(0);
+					gpio = new GpioController(PinNumberingScheme.Logical, driver);
+
+					gpio.OpenPin(address0Pin, PinMode.Output);
+					gpio.OpenPin(address1Pin, PinMode.Output);
+					gpio.OpenPin(address2Pin, PinMode.Output);
+					gpio.OpenPin(address3Pin, PinMode.Output);
+					gpio.OpenPin(address4Pin, PinMode.Output);
+					gpio.OpenPin(address5Pin, PinMode.Output);
+					gpio.OpenPin(address6Pin, PinMode.Output);
+					gpio.OpenPin(address7Pin, PinMode.Output);
+					gpio.OpenPin(triggerPin, PinMode.Output);
+					gpio.OpenPin(ledPin, PinMode.Output);
+					gpio.OpenPin(beeperPin, PinMode.Output);
 					break;
 			}
 
@@ -54,7 +109,12 @@ namespace MmsPiFobReader
 			switch (Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					return W26Pipe.Read();
+					var output = W26Pipe.Read();
+
+					if (string.IsNullOrEmpty(output))
+						output = serialPort.ReadExisting();
+
+					return output;
 				default:
 					Thread.Sleep(5);
 
@@ -97,12 +157,13 @@ namespace MmsPiFobReader
 			switch (Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					WiringPi.digitalWrite(22, 1);
-					WiringPi.digitalWrite(23, 1);
-					WiringPi.digitalWrite(24, 0);
-					WiringPi.digitalWrite(25, 0);
-					WiringPi.digitalWrite(26, 1);
-					WiringPi.digitalWrite(27, 0);
+					// For historical reasons, if we've not in cabinet mode, address5 is treated as a second trigger.
+					gpio.Write(new PinValuePair[] {
+						new PinValuePair(address5Pin, PinValue.High),
+						new PinValuePair(triggerPin, PinValue.High),
+						new PinValuePair(ledPin, PinValue.High),
+						new PinValuePair(beeperPin, PinValue.Low),
+					});
 					break;
 			}
 		}
@@ -114,12 +175,7 @@ namespace MmsPiFobReader
 				case HardwareType.RaspberryPi:
 					warningThread?.Join();
 
-					WiringPi.digitalWrite(22, 0);
-					WiringPi.digitalWrite(23, 0);
-					WiringPi.digitalWrite(24, 1);
-					WiringPi.digitalWrite(25, 1);
-					WiringPi.digitalWrite(26, 0);
-					WiringPi.digitalWrite(27, 0);
+					Output(0);
 					break;
 			}
 		}
@@ -129,57 +185,50 @@ namespace MmsPiFobReader
 			switch (Type) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					WiringPi.digitalWrite(9, 0); // Equipment Trigger, 1
-					WiringPi.digitalWrite(7, 0); // Equipment Trigger, 2
-					WiringPi.digitalWrite(15, 0); // Equipment Trigger, 3
-					WiringPi.digitalWrite(16, 0); // Equipment Trigger, 4
-					WiringPi.digitalWrite(2, 0); // Equipment Trigger, 5
-					WiringPi.digitalWrite(3, 0); // Equipment Trigger, 6
-					WiringPi.digitalWrite(4, 0); // Equipment Trigger, 7
-					WiringPi.digitalWrite(21, 0); // Equipment Trigger, 8
-					WiringPi.digitalWrite(22, 0); // Equipment Trigger, 9
-					WiringPi.digitalWrite(23, 0); // Equipment Trigger, 10
-					WiringPi.digitalWrite(24, 0); // Equipment Trigger, 11
-					WiringPi.digitalWrite(25, 0); // Equipment Trigger, 12
+					// Make sure this turns off first, before we 0 the address pins
+					gpio.Write(triggerPin, PinValue.Low);
 
-					switch (i) {
-						case 1:
-							WiringPi.digitalWrite(9, 1); // Equipment Trigger, 1
-							break;
-						case 2:
-							WiringPi.digitalWrite(7, 1); // Equipment Trigger, 2
-							break;
-						case 3:
-							WiringPi.digitalWrite(15, 1); // Equipment Trigger, 3
-							break;
-						case 4:
-							WiringPi.digitalWrite(16, 1); // Equipment Trigger, 4
-							break;
-						case 5:
-							WiringPi.digitalWrite(2, 1); // Equipment Trigger, 5
-							break;
-						case 6:
-							WiringPi.digitalWrite(3, 1); // Equipment Trigger, 6
-							break;
-						case 7:
-							WiringPi.digitalWrite(4, 1); // Equipment Trigger, 7
-							break;
-						case 8:
-							WiringPi.digitalWrite(21, 1); // Equipment Trigger, 8
-							break;
-						case 9:
-							WiringPi.digitalWrite(22, 1); // Equipment Trigger, 9
-							break;
-						case 10:
-							WiringPi.digitalWrite(23, 1); // Equipment Trigger, 10
-							break;
-						case 11:
-							WiringPi.digitalWrite(24, 1); // Equipment Trigger, 11
-							break;
-						case 12:
-							WiringPi.digitalWrite(25, 1); // Equipment Trigger, 12
-							break;
-					}
+					gpio.Write(new PinValuePair[] {
+						new PinValuePair(address0Pin, PinValue.Low),
+						new PinValuePair(address1Pin, PinValue.Low),
+						new PinValuePair(address2Pin, PinValue.Low),
+						new PinValuePair(address3Pin, PinValue.Low),
+						new PinValuePair(address4Pin, PinValue.Low),
+						new PinValuePair(address5Pin, PinValue.Low),
+						new PinValuePair(address6Pin, PinValue.Low),
+						new PinValuePair(address7Pin, PinValue.Low),
+						new PinValuePair(ledPin, PinValue.Low),
+						new PinValuePair(beeperPin, PinValue.Low),
+					});
+
+					if ((i & 1) > 0)
+						gpio.Write(address0Pin, PinValue.High);
+
+					if ((i & 2) > 0)
+						gpio.Write(address1Pin, PinValue.High);
+
+					if ((i & 4) > 0)
+						gpio.Write(address2Pin, PinValue.High);
+
+					if ((i & 8) > 0)
+						gpio.Write(address3Pin, PinValue.High);
+
+					if ((i & 16) > 0)
+						gpio.Write(address4Pin, PinValue.High);
+
+					if ((i & 32) > 0)
+						gpio.Write(address5Pin, PinValue.High);
+
+					if ((i & 64) > 0)
+						gpio.Write(address6Pin, PinValue.High);
+
+					if ((i & 128) > 0)
+						gpio.Write(address7Pin, PinValue.High);
+
+					// Make sure this turns on last, after we set the address pins
+					if (i > 0)
+						gpio.Write(triggerPin, PinValue.High);
+
 					break;
 			}
 		}
@@ -190,7 +239,7 @@ namespace MmsPiFobReader
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					if (seconds < 60 && seconds > 1)
-						WiringPi.digitalWrite(26, seconds % 2);
+						gpio.Write(ledPin, seconds % 2);
 
 					if (seconds > 45 || seconds < 1)
 						return;
@@ -211,11 +260,11 @@ namespace MmsPiFobReader
 
 		private static void WarnThread()
 		{
-			WiringPi.digitalWrite(27, 1);
+			gpio.Write(beeperPin, PinValue.High);
 
 			Thread.Sleep(WarningLength);
 
-			WiringPi.digitalWrite(27, 0);
+			gpio.Write(beeperPin, PinValue.Low);
 		}
 	}
 }

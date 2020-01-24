@@ -425,10 +425,7 @@ namespace MmsPiFobReader
 			Draw.Status(-1, false);
 			Draw.Prompt("Enter PIN or swipe fob");
 
-			if (cabinetMode)
-				ReaderHardware.Output(0);
-			else
-				ReaderHardware.Logout();
+			ReaderHardware.Logout();
 
 			try {
 				server.Logout(key);
