@@ -41,7 +41,7 @@ cd /root
 
 # Remove unneeded libraries
 heading 'Removing Libraries'
-apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog apt-listchanges
+apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog apt-listchanges wiringpi
 apt-get -y autoremove
 
 # Update the OS
@@ -51,7 +51,7 @@ apt-get -y dist-upgrade
 
 # Install needed libraries
 heading 'Installing Libraries'
-apt-get -y install git libunwind8 busybox-syslogd ntp libgpiod-dev gpiod wiringpi
+apt-get -y install git libunwind8 busybox-syslogd ntp libgpiod-dev gpiod
 
 # Install SSH Key
 heading 'Installing SSH Key'
