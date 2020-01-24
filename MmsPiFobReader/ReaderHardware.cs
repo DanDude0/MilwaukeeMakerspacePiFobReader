@@ -48,17 +48,17 @@ namespace MmsPiFobReader
 				case HardwareType.OrangePi:
 					serialPort = new SerialPort("/dev/ttyS3", 9600, Parity.None, 8, StopBits.One);
 
-					address0Pin = 3;
-					address1Pin = 4;
-					address2Pin = 27;
-					address3Pin = 22;
-					address4Pin = 5;
-					address5Pin = 6;
-					address6Pin = 19;
-					address7Pin = 26;
-					triggerPin = 13;
-					ledPin = 12;
-					beeperPin = 16;
+					address0Pin = 11;
+					address1Pin = 6;
+					address2Pin = 0;
+					address3Pin = 3;
+					address4Pin = 7;
+					address5Pin = 8;
+					address6Pin = 10;
+					address7Pin = 20;
+					triggerPin = 9;
+					ledPin = 200;
+					beeperPin = 201;
 					break;
 				case HardwareType.RaspberryPi:
 					serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One);

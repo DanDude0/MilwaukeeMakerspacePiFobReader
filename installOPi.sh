@@ -59,7 +59,7 @@ if [ -f "/boot/armbianEnv.txt.bak" ]
 then
 	cp -f /boot/armbianEnv.txt.bak /boot/armbianEnv.txt
 fi
-sed -i.bak 's/rootfstype=ext4/rootfstype=ext4\noverlays=spi-spidev spi-add-cs1\nparam_spidev_spi_bus=0\nparam_spidev_spi_cs=1\nextraargs=consoleblank=0 vt.global_cursor_default=0/g' /boot/armbianEnv.txt
+sed -i.bak 's/rootfstype=ext4/rootfstype=ext4\noverlays=spi-spidev spi-add-cs1 uart3\nparam_spidev_spi_bus=0\nparam_spidev_spi_cs=1\nextraargs=consoleblank=0 vt.global_cursor_default=0/g' /boot/armbianEnv.txt
 echo -e 'fbtft\nfbtft_device' > /etc/modules-load.d/fbtft.conf
 echo 'options fbtft_device rotate=270 name=piscreen speed=16000000 gpios=reset:2,dc:71 txbuflen=32768' > /etc/modprobe.d/fbtft.conf
 
