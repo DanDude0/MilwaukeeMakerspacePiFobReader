@@ -198,7 +198,7 @@ namespace MmsPiFobReader
 					ProcessCommand($"W26#{input}");
 					userEntryBuffer = "";
 				}
-				else if (input.Length > 10 && input[0] == 0x2 ) {
+				else if (input.Length > 10 && input[0] == 0x2) {
 					// Detect and chop off start/stop bytes from an RS232 reader
 					input = input.Substring(1, 10);
 
@@ -529,6 +529,7 @@ namespace MmsPiFobReader
 			UpdateStatus();
 
 			var draw = true;
+			var trigger = false;
 
 			while (true) {
 				if (draw) {
@@ -540,10 +541,10 @@ IP Address: {status.Ip}
 Reader Id: {status.Id}     Server: {status.Server}
 
 [1] Set Reader Id	[2] Set Server
-[3] Test Cabinet Menu
-[4] Update Reader	[5] Reboot Reader
-[6] Shutdown Reader
-[7] Exit Reader Application");
+[3] Test Cabinet   [4] Toggle Trigger
+[5] Update Reader	[6] Reboot Reader
+[7] Shutdown Reader
+[8] Exit Reader Application");
 
 
 					draw = false;
@@ -571,6 +572,17 @@ Reader Id: {status.Id}     Server: {status.Server}
 						EnterCabinetMenu();
 						break;
 					case '4':
+						if (trigger) {
+							trigger = false;
+							ReaderHardware.Logout();
+						}
+						else {
+							trigger = true;
+							ReaderHardware.Login();
+						}
+
+						break;
+					case '5':
 						switch (ReaderHardware.Type) {
 							case HardwareType.OrangePi:
 								Process.Start("bash", "-c \"cd /tmp; rm -f installOPi.sh; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh; chmod +x installOPi.sh; sudo ./installOPi.sh\"");
@@ -584,19 +596,19 @@ Reader Id: {status.Id}     Server: {status.Server}
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
-					case '5':
+					case '6':
 						Process.Start("reboot");
 						Process.Start("systemctl", "stop MmsPiW26Interface");
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
-					case '6':
+					case '7':
 						Process.Start("shutdown", "-hP 0");
 						Process.Start("systemctl", "stop MmsPiW26Interface");
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
-					case '7':
+					case '8':
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;

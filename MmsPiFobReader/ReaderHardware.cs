@@ -177,13 +177,8 @@ namespace MmsPiFobReader
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					warningThread?.Join();
-					// Hack to make my welder work off grid
-					gpio.Write(new PinValuePair[] {
-						new PinValuePair(address5Pin, PinValue.High),
-						new PinValuePair(triggerPin, PinValue.High),
-						new PinValuePair(ledPin, PinValue.High),
-						new PinValuePair(beeperPin, PinValue.Low),
-					});
+
+					Output(0);
 					break;
 			}
 		}
