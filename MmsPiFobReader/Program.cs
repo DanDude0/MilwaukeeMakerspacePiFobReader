@@ -506,9 +506,8 @@ namespace MmsPiFobReader
 							Draw.Prompt($"Selected: {item}");
 							server.Action(key, item);
 							ReaderHardware.Output(code);
-							Thread.Sleep(400);
+							Thread.Sleep(1000);
 							ReaderHardware.Output(0);
-							Thread.Sleep(600);
 							return;
 						}
 						else {
