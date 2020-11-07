@@ -27,8 +27,8 @@ namespace MmsPiFobReader
 		private static Color green = Color.FromRgb(26, 255, 26);
 		private static Color blue = Color.FromRgb(76, 76, 255);
 		private static Color grey = Color.FromRgb(128, 128, 128);
-		private static Image<Bgr565> logo200 = Image.Load<Bgr565>("mms200x226.png");
-		private static Image<Bgr565> logo150 = Image.Load<Bgr565>("mms150x170.png");
+		private static Image logo200 = Image.Load("mms200x226.png");
+		private static Image logo150 = Image.Load("mms150x170.png");
 
 		public static void Loading(string message)
 		{

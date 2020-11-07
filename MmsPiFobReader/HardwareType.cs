@@ -6,7 +6,7 @@ namespace MmsPiFobReader
 {
 	enum HardwareType
 	{
-		SDL,
+		PC,
 		OrangePi,
 		RaspberryPi,
 	}

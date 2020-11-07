@@ -582,7 +582,7 @@ Reader Id: {status.Id}     Server: {status.Server}
 
 						break;
 					case '5':
-						switch (ReaderHardware.Type) {
+						switch (ReaderHardware.Platform) {
 							case HardwareType.OrangePi:
 								Process.Start("bash", "-c \"cd /tmp; rm -f installOPi.sh; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh; chmod +x installOPi.sh; sudo ./installOPi.sh\"");
 								break;

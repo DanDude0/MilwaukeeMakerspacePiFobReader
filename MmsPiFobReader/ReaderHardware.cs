@@ -10,7 +10,8 @@ namespace MmsPiFobReader
 {
 	static class ReaderHardware
 	{
-		public static HardwareType Type { get; private set; }
+		public static HardwareType Platform { get; private set; }
+		public static ScreenType Screen { get; private set; }
 
 		private static SerialPort serialPort;
 		private static GpioController gpio;
@@ -32,19 +33,46 @@ namespace MmsPiFobReader
 		public static void Initialize()
 		{
 			// Default to SDL interface for cross platform desktop support
-			Type = HardwareType.SDL;
+			Platform = HardwareType.PC;
+			Screen = ScreenType.SDLWindow480x360;
 
 			// Check for supported embedded platforms
 			if (File.Exists("/proc/device-tree/model")) {
 				var model = File.ReadAllText("/proc/device-tree/model");
 
 				if (model.Contains("Orange Pi"))
-					Type = HardwareType.OrangePi;
+					Platform = HardwareType.OrangePi;
 				else if (model.Contains("Raspberry Pi"))
-					Type = HardwareType.RaspberryPi;
+					Platform = HardwareType.RaspberryPi;
 			}
 
-			switch (Type) {
+			// Check for supported embedded screens
+			if (File.Exists("/sys/class/graphics/fb1/virtual_size")) {
+				var size = File.ReadAllText("/sys/class/graphics/fb1/virtual_size");
+
+				switch (size) {
+					case "480,320":
+						Screen = ScreenType.FB480x360;
+						break;
+					case "800,480":
+						Screen = ScreenType.FB800x480;
+						break;
+				}
+			}
+			else if (File.Exists("/sys/class/graphics/fb0/virtual_size")) {
+				var size = File.ReadAllText("/sys/class/graphics/fb0/virtual_size");
+
+				switch (size) {
+					case "480,320":
+						Screen = ScreenType.FB480x360;
+						break;
+					case "800,480":
+						Screen = ScreenType.FB800x480;
+						break;
+				}
+			}
+
+			switch (Platform) {
 				case HardwareType.OrangePi:
 					serialPort = new SerialPort("/dev/ttyS3", 9600, Parity.None, 8, StopBits.One);
 
@@ -77,7 +105,7 @@ namespace MmsPiFobReader
 					break;
 			}
 
-			switch (Type) {
+			switch (Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					W26Pipe.Initalize();
@@ -106,7 +134,7 @@ namespace MmsPiFobReader
 
 		public static string Read()
 		{
-			switch (Type) {
+			switch (Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					var output = W26Pipe.Read();
@@ -157,7 +185,7 @@ namespace MmsPiFobReader
 
 		public static void Login()
 		{
-			switch (Type) {
+			switch (Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					// For historical reasons, if we've not in cabinet mode, address5 is treated as a second trigger.
@@ -173,7 +201,7 @@ namespace MmsPiFobReader
 
 		public static void Logout()
 		{
-			switch (Type) {
+			switch (Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					warningThread?.Join();
@@ -185,7 +213,7 @@ namespace MmsPiFobReader
 
 		public static void Output(int i)
 		{
-			switch (Type) {
+			switch (Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					// Make sure this turns off first, before we 0 the address pins
@@ -238,7 +266,7 @@ namespace MmsPiFobReader
 
 		public static void Warn(int seconds)
 		{
-			switch (Type) {
+			switch (Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					if (seconds < 60 && seconds > 1)
