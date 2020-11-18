@@ -180,7 +180,7 @@ namespace MmsPiFobReader
 						Logout();
 
 					if (!inputCleared && DateTime.Now - lastEntry > new TimeSpan(0, 0, 30)) {
-						Draw.Prompt("Enter PIN or swipe fob");
+						ClearEntry();
 						userEntryBuffer = "";
 						inputCleared = true;
 					}
@@ -208,7 +208,7 @@ namespace MmsPiFobReader
 				else if (input.Length == 1) {
 					switch (input[0]) {
 						case 'A':
-							Draw.Prompt("Enter PIN or swipe fob");
+							ClearEntry();
 							userEntryBuffer = "";
 							break;
 						case 'B':
@@ -273,13 +273,7 @@ namespace MmsPiFobReader
 			Draw.Heading(config.Name, status.Warning);
 			Draw.Status(-1, false);
 			Logout();
-
-			if (user != null)
-				Draw.User(user);
-			else if (config.Enabled)
-				Draw.Prompt("Enter PIN or swipe fob");
-			else
-				Draw.Prompt("Login has been disabled");
+			ClearEntry();
 		}
 
 		static void ConnectThread()
@@ -377,6 +371,16 @@ namespace MmsPiFobReader
 			}
 		}
 
+		static void ClearEntry()
+		{
+			if (user != null)
+				Draw.User(user);
+			else if (config.Enabled)
+				Draw.Prompt("Enter PIN or swipe fob");
+			else
+				Draw.Prompt("Login has been disabled");
+		}
+
 		static void ProcessCommand(string command)
 		{
 			// Empty Input
@@ -447,7 +451,7 @@ namespace MmsPiFobReader
 			inputCleared = true;
 			user = null;
 			Draw.Status(-1, false);
-			Draw.Prompt("Enter PIN or swipe fob");
+			ClearEntry();
 
 			ReaderHardware.Logout();
 
