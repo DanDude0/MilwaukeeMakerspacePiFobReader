@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net5.0</TargetFramework>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<NoWarn>NU1701,CS0618</NoWarn>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -11,18 +11,20 @@
 		<PublishTrimmed>true</PublishTrimmed>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DefineConstants>TRACE;RPI</DefineConstants>
-		<Optimize>false</Optimize>
+		<DefineConstants>TRACE</DefineConstants>
+		<Optimize>true</Optimize>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<Optimize>false</Optimize>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-		<PackageReference Include="Rssdp" Version="4.0.2" />
-		<PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-beta0007" />
-		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0007" />
-		<PackageReference Include="System.Device.Gpio" Version="1.0.0" />
-		<PackageReference Include="System.IO.Ports" Version="4.7.0" />
+		<PackageReference Include="Rssdp" Version="4.0.3" />
+		<PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
+		<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0010" />
+		<PackageReference Include="sqlite-net-pcl" Version="1.7.335" />
+		<PackageReference Include="System.Device.Gpio" Version="1.1.0" />
+		<PackageReference Include="System.IO.Ports" Version="5.0.0" />
 		<PackageReference Include="System.Net.Primitives" Version="4.3.1" />
 		<PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
 		<PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />

@@ -5,18 +5,15 @@ using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Threading;
 using SDL2;
-using SixLabors.Fonts;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 
 namespace MmsPiFobReader
 {
 	class Screen
 	{
-		Image<Bgra32> buffer = new Image<Bgra32>(800, 480);
+		Image<Bgr565> buffer = new Image<Bgr565>(480, 320);
 		byte[] currentFrame;
 		byte[] pendingFrame;
 		FileStream frameBuffer;
@@ -25,6 +22,7 @@ namespace MmsPiFobReader
 		IntPtr renderer;
 		IntPtr texture;
 		Thread drawThread;
+		bool active;
 
 		public Screen()
 		{
@@ -47,13 +45,13 @@ namespace MmsPiFobReader
 					// Make a desktop window to draw the screen contents to
 					SDL.SDL_Init(SDL.SDL_INIT_EVERYTHING);
 					//SDL.SDL_WindowFlags.SDL_WINDOW_FULLSCREEN_DESKTOP |
-					window = SDL.SDL_CreateWindow("MmsPiFobReader", 50, 50, 800, 480, SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
+					window = SDL.SDL_CreateWindow("MmsPiFobReader", 50, 50, 480, 320, SDL.SDL_WindowFlags.SDL_WINDOW_OPENGL);
 					renderer = SDL.SDL_CreateRenderer(window, -1, SDL.SDL_RendererFlags.SDL_RENDERER_ACCELERATED);
 					SDL.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 					SDL.SDL_RenderClear(renderer);
 					SDL.SDL_RenderPresent(renderer);
 					SDL.SDL_ShowCursor(SDL.SDL_DISABLE);
-					texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_ARGB8888, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, 800, 480);
+					texture = SDL.SDL_CreateTexture(renderer, SDL.SDL_PIXELFORMAT_RGB565, (int)SDL.SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING, 480, 320);
 					break;
 			}
 		}
@@ -70,6 +68,7 @@ namespace MmsPiFobReader
 		{
 			File.AppendAllText("/sys/class/vtconsole/vtcon1/bind", "0");
 
+			active = true;
 			drawThread = new Thread(DrawThread);
 			drawThread.Start();
 		}
@@ -81,7 +80,8 @@ namespace MmsPiFobReader
 
 		private void EnableConsole(object sender, EventArgs e)
 		{
-			drawThread.Abort();
+			active = false;
+			drawThread.Interrupt();
 
 			File.AppendAllText("/sys/class/vtconsole/vtcon1/bind", "1");
 			Process.Start("setupcon");
@@ -89,7 +89,7 @@ namespace MmsPiFobReader
 
 		private unsafe void Draw()
 		{
-			var span = buffer.GetPixelSpan();
+			buffer.TryGetSinglePixelSpan(out var span);
 
 			byte[] bytes = MemoryMarshal.AsBytes(span).ToArray();
 
@@ -110,7 +110,7 @@ namespace MmsPiFobReader
 					break;
 				default:
 					fixed (byte *pointer = bytes) {
-						SDL.SDL_UpdateTexture(texture, IntPtr.Zero, (IntPtr)pointer, 800 * 4);
+						SDL.SDL_UpdateTexture(texture, IntPtr.Zero, (IntPtr)pointer, 480 * 2);
 					}
 
 					SDL.SDL_RenderClear(renderer);
@@ -122,7 +122,7 @@ namespace MmsPiFobReader
 
 		private void DrawThread()
 		{
-			while (true) {
+			while (active) {
 				try {
 					if (currentFrame == null)
 						Thread.Sleep(10000);
@@ -136,7 +136,7 @@ namespace MmsPiFobReader
 					}
 				}
 				catch (ThreadInterruptedException) {
-					// Continue
+					// Continue to either redraw or exit.
 				}
 			}
 		}

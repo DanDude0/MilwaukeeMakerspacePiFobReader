@@ -16,6 +16,7 @@ namespace MmsPiFobReader
 		// Set at Initialization
 		static readonly ReaderStatus status = new ReaderStatus();
 		static MilwaukeeMakerspaceApiClient server;
+		static IController controller;
 		static ReaderResult config;
 
 		// Populated from config settings
@@ -148,7 +149,6 @@ namespace MmsPiFobReader
 			var lastEntry = DateTime.MinValue;
 			var seconds = -1;
 
-			UpdateStatus();
 			Connect();
 
 			// Main activity loop
@@ -234,8 +234,13 @@ namespace MmsPiFobReader
 
 		static void Connect()
 		{
+			UpdateStatus();
+
 			status.Id = 0;
+			server?.Dispose();
+			controller?.Dispose();
 			server = null;
+			controller = null;
 			config = null;
 
 			// Use a background thread to do the connect to avoid stalling UI
@@ -264,7 +269,8 @@ namespace MmsPiFobReader
 			}
 
 			inputCleared = true;
-			Draw.Heading(config.Name);
+
+			Draw.Heading(config.Name, status.Warning);
 			Draw.Status(-1, false);
 			Logout();
 
@@ -283,6 +289,7 @@ namespace MmsPiFobReader
 
 				var message = loadingMessages[random.Next(loadingMessages.Length - 1)];
 
+				UpdateStatus();
 				Draw.Loading(message);
 
 				try {
@@ -297,20 +304,34 @@ namespace MmsPiFobReader
 				}
 
 				try {
-					if (status.Id != 0)
+					if (status.Id != 0) {
+						server?.Dispose();
 						server = new MilwaukeeMakerspaceApiClient(status);
+						controller?.Dispose();
+						controller = server;
+					}
 				}
 				catch (Exception ex) {
 					Log.Exception(ex);
 
 					Draw.Fatal($"Cannot reach server\nReader IP: {status.Ip}");
 
-					Thread.Sleep(20000);
+					Thread.Sleep(2000);
+
+					try {
+						// Fall back to a local snapshot database if one exists.
+						controller?.Dispose();
+						controller = new LocalController(status);
+					}
+					catch {
+						// Wait some more, and loop around
+						Thread.Sleep(20000);
+					}
 				}
 
 				try {
-					if (server != null) {
-						config = server.Initialize();
+					if (controller != null) {
+						config = controller.Initialize();
 
 						cabinetMode = false;
 						warningBeep = true;
@@ -386,19 +407,15 @@ namespace MmsPiFobReader
 			AuthenticationResult newUser;
 
 			try {
-				newUser = server.Authenticate(keyIn);
+				newUser = controller.Authenticate(keyIn);
 			}
 			catch (Exception ex) {
 				Log.Exception(ex);
 
-				switch (ex) {
-					case HttpRequestException e when e.Message.Contains("403 (Forbidden)"):
-						Draw.Prompt("Invalid key");
-						break;
-					default:
-						Connect();
-						break;
-				}
+				if (ex.Message.Contains("403 (Forbidden)") || ex.Message.Contains("Invalid key"))
+					Draw.Prompt("Invalid key");
+				else
+					Connect();
 
 				return;
 			}
@@ -435,7 +452,7 @@ namespace MmsPiFobReader
 			ReaderHardware.Logout();
 
 			try {
-				server.Logout(key);
+				controller.Logout(key);
 			}
 			catch (Exception ex) {
 				Log.Exception(ex);
@@ -502,9 +519,9 @@ namespace MmsPiFobReader
 							var item = cabinetItems[code];
 
 							Draw.MenuOverride = false;
-							Draw.Heading(config.Name);
+							Draw.Heading(config.Name, status.Warning);
 							Draw.Prompt($"Selected: {item}");
-							server.Action(key, item);
+							controller.Action(key, item);
 							ReaderHardware.Output(code);
 							Thread.Sleep(1000);
 							ReaderHardware.Output(0);
@@ -536,14 +553,15 @@ namespace MmsPiFobReader
 					Draw.Service($@"Version: {status.Version}
 Uptime: {status.Uptime}
 Hardware: {status.Hardware}
-IP Address: {status.Ip}
-Reader Id: {status.Id}     Server: {status.Server}
+IP Address: {status.Ip}     Reader Id: {status.Id}
+Server: {status.Server}     Controller: {status.Controller}
+Snapshot: {status.LocalSnapshot}
 
 [1] Set Reader Id	[2] Set Server
 [3] Test Cabinet   [4] Toggle Trigger
 [5] Update Reader	[6] Reboot Reader
-[7] Shutdown Reader
-[8] Exit Reader Application");
+[7] Shutdown Reader   [8] Exit App
+[9] Download Snapshot");
 
 
 					draw = false;
@@ -610,6 +628,24 @@ Reader Id: {status.Id}     Server: {status.Server}
 					case '8':
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
+						break;
+					case '9':
+						Draw.Loading("Downloading Database Snapshot");
+						//TODO: If we can talk to the server, push attempt history back up BEFORE we overwrite it.
+						try {
+							server.DownloadSnapshot();
+
+							Draw.Service("Snapshot updated");
+
+							Thread.Sleep(2000);
+						}
+						catch {
+							Draw.Service("Could not download snapshot");
+
+							Thread.Sleep(2000);
+						}
+
+						UpdateStatus();
 						break;
 				}
 
@@ -736,12 +772,19 @@ Server: {complete}
 		{
 			status.Version = File.GetCreationTime("MmsPiFobReader.dll").ToString();
 			status.Hardware = "SDL";
+			status.LocalSnapshot = "No";
 
 			if (File.Exists("/proc/device-tree/model"))
 				status.Hardware = File.ReadAllText("/proc/device-tree/model");
 
+			if (File.Exists("/etc/os-release"))
+				status.Os = File.ReadAllText("/etc/os-release");
+
 			if (File.Exists("/etc/armbian-release"))
 				status.Os = File.ReadAllText("/etc/armbian-release");
+
+			if (File.Exists(LocalController.FileName))
+				status.LocalSnapshot = "Yes, " + GetCommandOutput("ls -l", LocalController.FileName);
 
 			status.Kernel = GetCommandOutput("uname", "-a");
 			status.Uptime = GetCommandOutput("uptime", "");

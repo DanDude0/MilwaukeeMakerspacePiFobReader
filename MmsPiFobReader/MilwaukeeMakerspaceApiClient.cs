@@ -10,10 +10,9 @@ using Rssdp;
 
 namespace MmsPiFobReader
 {
-	class MilwaukeeMakerspaceApiClient
+	class MilwaukeeMakerspaceApiClient : IController
 	{
-		ReaderStatus status;
-
+		private ReaderStatus status;
 		private HttpClient client;
 
 		public MilwaukeeMakerspaceApiClient(ReaderStatus statusIn)
@@ -31,6 +30,15 @@ namespace MmsPiFobReader
 
 			// Check if server is responding
 			var unused = client.GetStringAsync($"/").Result;
+
+			status.Controller = "Server";
+			status.Warning = "";
+		}
+
+		public void Dispose()
+		{
+			client?.Dispose();
+			client = null;
 		}
 
 		public ReaderResult Initialize()
@@ -88,6 +96,16 @@ namespace MmsPiFobReader
 			var result = client.PostAsync($"reader/action", request).Result;
 
 			result.EnsureSuccessStatusCode();
+		}
+
+		public void DownloadSnapshot()
+		{
+			var result = client.GetAsync($"reader/snapshot").Result;
+
+			result.EnsureSuccessStatusCode();
+
+			using (var fs = new FileStream(LocalController.FileName, FileMode.Create))
+				result.Content.CopyTo(fs, null, CancellationToken.None);
 		}
 
 		private HttpClient GetClient()

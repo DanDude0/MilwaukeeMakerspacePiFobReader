@@ -71,6 +71,31 @@ namespace MmsPiFobReader
 						break;
 				}
 			}
+			// Check for supported embedded screens
+			if (File.Exists("/sys/class/graphics/fb1/virtual_size")) {
+				var size = File.ReadAllText("/sys/class/graphics/fb1/virtual_size");
+
+				switch (size) {
+					case "480,320":
+						Screen = ScreenType.FB480x360;
+						break;
+					case "800,480":
+						Screen = ScreenType.FB800x480;
+						break;
+				}
+			}
+			else if (File.Exists("/sys/class/graphics/fb0/virtual_size")) {
+				var size = File.ReadAllText("/sys/class/graphics/fb0/virtual_size");
+
+				switch (size) {
+					case "480,320":
+						Screen = ScreenType.FB480x360;
+						break;
+					case "800,480":
+						Screen = ScreenType.FB800x480;
+						break;
+				}
+			}
 
 			switch (Platform) {
 				case HardwareType.OrangePi:

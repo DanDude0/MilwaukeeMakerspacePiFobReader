@@ -2,9 +2,9 @@ using System;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Drawing.Processing;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-using SixLabors.Primitives;
 
 namespace MmsPiFobReader
 {
@@ -46,19 +46,21 @@ namespace MmsPiFobReader
 					new PointF(0, 319)
 				)
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 20,
-					VerticalAlignment = VerticalAlignment.Center,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 20,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
 				},
 					message,
 					bigFont,
 					white,
-					new PointF(10, 160)
+					new PointF(10, 152)
 					)
 				);
 		}
 
-		public static void Heading(string name)
+		public static void Heading(string name, string warning)
 		{
 			if (MenuOverride)
 				return;
@@ -67,14 +69,16 @@ namespace MmsPiFobReader
 				.Fill(black)
 				.DrawImage(logo150, new Point(0, 0), 1)
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 160,
-					VerticalAlignment = VerticalAlignment.Top,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 160,
+						VerticalAlignment = VerticalAlignment.Top,
+					}
 				},
 					name,
 					littleFont,
 					red,
-					new PointF(160, 0)
+					new PointF(160, -8)
 				)
 				.DrawPolygon(
 					grey,
@@ -83,6 +87,22 @@ namespace MmsPiFobReader
 					new PointF(480, 210),
 					new PointF(480, 319),
 					new PointF(0, 319)
+				)
+			);
+
+			if (warning.Length > 0)
+			screen.Mutate(s => s
+				.DrawText(new TextGraphicsOptions {
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 150,
+						VerticalAlignment = VerticalAlignment.Top,
+					}
+				},
+					warning,
+					tinyFont,
+					white,
+					new PointF(0, 50)
 				)
 			);
 		}
@@ -130,16 +150,18 @@ namespace MmsPiFobReader
 			}
 
 			screen.Mutate(s => s
-				.Fill(bg, new RectangleF(159, 88, 480 - 159, 110))
+				.Fill(bg, new RectangleF(159, 96, 480 - 159, 110))
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 160,
-					VerticalAlignment = VerticalAlignment.Center,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 160,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
 				},
 					text,
 					font,
 					color,
-					new PointF(160, 143)
+					new PointF(160, 144)
 					),
 					draw
 				);
@@ -153,23 +175,27 @@ namespace MmsPiFobReader
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 12,
-					VerticalAlignment = VerticalAlignment.Center,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 12,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
 				},
 					$"Hello, {user.Name}!\nRenewal due: {user.Expiration.ToString($"yyyy-MM-dd")}\nLogin to extend, '0       ' to Logout",
 					tinyFont,
 					white,
-					new PointF(6, 263)
+					new PointF(6, 259)
 					)
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					VerticalAlignment = VerticalAlignment.Center,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
 				},
 					"ENT",
 					entFont,
 					white,
-					new PointF(297, 298)
+					new PointF(297, 295)
 					)
 				);
 		}
@@ -182,14 +208,16 @@ namespace MmsPiFobReader
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 12,
-					VerticalAlignment = VerticalAlignment.Center,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 12,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
 				},
 					contents,
 					littleFont,
 					white,
-					new PointF(6, 265)
+					new PointF(6, 256)
 					)
 				);
 		}
@@ -202,14 +230,16 @@ namespace MmsPiFobReader
 			screen.Mutate(s => s
 				.Fill(black, new RectangleF(5, 215, 470, 100))
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 12,
-					VerticalAlignment = VerticalAlignment.Top,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 12,
+						VerticalAlignment = VerticalAlignment.Top,
+					}
 				},
 					contents,
 					hugeFont,
 					white,
-					new PointF(6, 240)
+					new PointF(6, 215)
 					)
 				);
 		}
@@ -230,14 +260,16 @@ namespace MmsPiFobReader
 					new PointF(0, 319)
 				)
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Center,
-					WrapTextWidth = 480 - 20,
-					VerticalAlignment = VerticalAlignment.Center,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 20,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
 				},
 					$"! ERROR !\n{contents}",
 					bigFont,
 					red,
-					new PointF(10, 160)
+					new PointF(10, 152)
 					)
 				);
 		}
@@ -255,14 +287,16 @@ namespace MmsPiFobReader
 					new PointF(0, 319)
 				)
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Left,
-					WrapTextWidth = 480 - 20,
-					VerticalAlignment = VerticalAlignment.Top,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Left,
+						WrapTextWidth = 480 - 20,
+						VerticalAlignment = VerticalAlignment.Top,
+					}
 				},
 					message,
 					microFont,
 					white,
-					new PointF(10, 10)
+					new PointF(10, 7)
 					)
 				);
 		}
@@ -297,24 +331,28 @@ namespace MmsPiFobReader
 					new PointF(0, 319)
 				)
 				.DrawText(new TextGraphicsOptions {
-					HorizontalAlignment = HorizontalAlignment.Left,
-					WrapTextWidth = 480 - 20,
-					VerticalAlignment = VerticalAlignment.Top,
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Left,
+						WrapTextWidth = 480 - 20,
+						VerticalAlignment = VerticalAlignment.Top,
+					}
 				},
 					message,
 					font,
 					white,
-					new PointF(10, 10)
+					new PointF(10, 7)
 					)
 				.DrawText(new TextGraphicsOptions {
-					 HorizontalAlignment = HorizontalAlignment.Left,
-					 WrapTextWidth = 480 - 20,
-					 VerticalAlignment = VerticalAlignment.Top,
-				 },
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Left,
+						WrapTextWidth = 480 - 20,
+						VerticalAlignment = VerticalAlignment.Top,
+					}
+				},
 					entry,
 					smallerFont,
 					white,
-					new PointF(10, 230)
+					new PointF(10, 220)
 					)
 				);
 		}
