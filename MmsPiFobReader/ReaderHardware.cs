@@ -213,8 +213,10 @@ namespace MmsPiFobReader
 			switch (Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					// For historical reasons, if we've not in cabinet mode, address5 is treated as a second trigger.
+					// For historical reasons, if we've not in cabinet mode, addresses 7,6,5 are treated as additional triggers.
 					gpio.Write(new PinValuePair[] {
+						new PinValuePair(address7Pin, PinValue.High),
+						new PinValuePair(address6Pin, PinValue.High),
 						new PinValuePair(address5Pin, PinValue.High),
 						new PinValuePair(triggerPin, PinValue.High),
 						new PinValuePair(ledPin, PinValue.High),
