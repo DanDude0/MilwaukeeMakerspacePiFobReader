@@ -39,6 +39,11 @@ fi
 # Work out of root user home
 cd /root
 
+# Disable serial console, we need the interface for fob reader.
+heading 'Disabling serial console'
+systemctl stop serial-getty@ttyAMA0
+systemctl disable serial-getty@ttyAMA0
+
 # Remove unneeded libraries
 heading 'Removing Libraries'
 apt-get -y purge anacron unattended-upgrades logrotate dphys-swapfile rsyslog apt-listchanges wiringpi

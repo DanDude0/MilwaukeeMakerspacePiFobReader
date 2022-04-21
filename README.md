@@ -172,11 +172,11 @@ Add the following lines to the bottom of the file:
 	over_voltage_sdram=0
 	gpu_mem=16
 	dtoverlay=pi3-disable-bt
-	enable_uart=0
+	enable_uart=1
 
 	#Driver for screen
 	dtparam=spi=on
-	dtoverlay=piscreen,rotate=270,speed=24000000
+	dtoverlay=lcd35spi,rotate=270,speed=24000000
 
 Now you can insert the SD card into your Raspberry Pi.
 

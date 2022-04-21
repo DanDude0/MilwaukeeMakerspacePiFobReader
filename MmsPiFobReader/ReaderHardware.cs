@@ -100,6 +100,7 @@ namespace MmsPiFobReader
 			switch (Platform) {
 				case HardwareType.OrangePi:
 					serialPort = new SerialPort("/dev/ttyS3", 9600, Parity.None, 8, StopBits.One);
+					serialPort.Encoding = System.Text.Encoding.Latin1;
 
 					address0Pin = 11;
 					address1Pin = 6;
@@ -164,11 +165,18 @@ namespace MmsPiFobReader
 				case HardwareType.RaspberryPi:
 					var output = W26Pipe.Read();
 
-					if (string.IsNullOrEmpty(output))
-						output = serialPort.ReadExisting();
+					if (string.IsNullOrEmpty(output)) {
+						try {
+							output = serialPort.ReadExisting();
+						}
+						catch (Exception ex) {
+							Console.WriteLine($"Exception reading from serial port.\n{ex.ToString()}");
+							output = null;
+						}
+					}
 
 					if (!string.IsNullOrEmpty(output))
-						Console.WriteLine($"Received raw input [{output.Length}]: {output} {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(output))}");
+						Console.WriteLine($"Received raw input [{output.Length}]: {Convert.ToBase64String(System.Text.Encoding.Latin1.GetBytes(output))} '{output}'");
 
 					return output;
 				default:
