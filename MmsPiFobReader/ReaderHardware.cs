@@ -2,7 +2,6 @@ using System;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.IO;
-using System.IO.Ports;
 using System.Threading;
 using SDL2;
 
@@ -13,7 +12,6 @@ namespace MmsPiFobReader
 		public static HardwareType Platform { get; private set; }
 		public static ScreenType Screen { get; private set; }
 
-		private static SerialPort serialPort;
 		private static GpioController gpio;
 
 		private static int address0Pin = 0;
@@ -99,8 +97,7 @@ namespace MmsPiFobReader
 
 			switch (Platform) {
 				case HardwareType.OrangePi:
-					serialPort = new SerialPort("/dev/ttyS3", 9600, Parity.None, 8, StopBits.One);
-					serialPort.Encoding = System.Text.Encoding.Latin1;
+					RS232Port.Initalize("/dev/ttyS3");
 
 					address0Pin = 11;
 					address1Pin = 6;
@@ -115,7 +112,7 @@ namespace MmsPiFobReader
 					beeperPin = 201;
 					break;
 				case HardwareType.RaspberryPi:
-					serialPort = new SerialPort("/dev/serial0", 9600, Parity.None, 8, StopBits.One);
+					RS232Port.Initalize("/dev/serial0");
 
 					address0Pin = 3;
 					address1Pin = 4;
@@ -135,8 +132,6 @@ namespace MmsPiFobReader
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
 					W26Pipe.Initalize();
-
-					serialPort.Open();
 
 					var driver = new LibGpiodDriver(0);
 					gpio = new GpioController(PinNumberingScheme.Logical, driver);
@@ -158,6 +153,10 @@ namespace MmsPiFobReader
 			Logout();
 		}
 
+		/// <summary>
+		/// Read user input from whatever devices we can.
+		/// </summary>
+		/// <returns>Must never return null string, use an empty string if you must.</returns>
 		public static string Read()
 		{
 			switch (Platform) {
@@ -166,13 +165,7 @@ namespace MmsPiFobReader
 					var output = W26Pipe.Read();
 
 					if (string.IsNullOrEmpty(output)) {
-						try {
-							output = serialPort.ReadExisting();
-						}
-						catch (Exception ex) {
-							Console.WriteLine($"Exception reading from serial port.\n{ex.ToString()}");
-							output = null;
-						}
+						output = RS232Port.Read();
 					}
 
 					if (!string.IsNullOrEmpty(output))

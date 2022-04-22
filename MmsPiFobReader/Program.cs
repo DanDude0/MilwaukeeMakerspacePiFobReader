@@ -198,10 +198,7 @@ namespace MmsPiFobReader
 					ProcessCommand($"W26#{input}");
 					userEntryBuffer = "";
 				}
-				else if (input.Length > 10 && input[0] == 0x2) {
-					// Detect and chop off start/stop bytes from an RS232 reader
-					input = input.Substring(1, 10);
-
+				else if (input.Length == 10) {
 					ProcessCommand(input);
 					userEntryBuffer = "";
 				}
@@ -227,7 +224,7 @@ namespace MmsPiFobReader
 					}
 				}
 				else if (input.Length > 0) {
-					Console.WriteLine($"Received input unknown [{input.Length}]: {input} {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(input))}");
+					Console.WriteLine($"Received input unknown [{input.Length}]: {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(input))} '{input}'");
 				}
 			}
 		}
@@ -272,7 +269,7 @@ namespace MmsPiFobReader
 
 			Draw.Heading(config.Name, status.Warning);
 			Draw.Status(-1, false);
-			Logout();
+			ForceLogout();
 			ClearEntry();
 		}
 
@@ -383,25 +380,30 @@ namespace MmsPiFobReader
 
 		static void ProcessCommand(string command)
 		{
-			// Empty Input
 			if (command == ServiceMenuMagicCode) {
 				EnterServiceMenu();
 
 				Connect();
 			}
+			// Empty Input
 			else if (command == "") {
 				// Do Nothing
 			}
 			// Force Logout
 			else if (command == "0") {
-				expiration = DateTime.Now - new TimeSpan(0, 0, 1);
-
-				Logout();
+				ForceLogout();
 			}
 			// Login / Extend
 			else {
 				Login(command);
 			}
+		}
+
+		static void ForceLogout()
+		{
+			expiration = DateTime.Now - new TimeSpan(0, 0, 1);
+
+			Logout();
 		}
 
 		static void Login(string keyIn)
@@ -450,6 +452,7 @@ namespace MmsPiFobReader
 		{
 			inputCleared = true;
 			user = null;
+			Draw.Heading(config.Name, status.Warning);
 			Draw.Status(-1, false);
 			ClearEntry();
 
