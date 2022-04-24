@@ -24,12 +24,14 @@ jobs:
     - name: Publish
       run: dotnet publish --configuration Release --self-contained -r linux-arm -o publish
     - name: Make Version Number
-      run: echo "version=$(date +'%Y%m%d.%H%M%S') ARM" >> $GITHUB_ENV
+      run: |
+        echo "release=$(date +'%Y%m%d.%H%M%S') ARM" >> $GITHUB_ENV
+        echo "version=$(date +'%Y%m%d.%H%M%S')" >> $GITHUB_ENV
     - name: Publish Release
       uses: ncipollo/release-action@v1
       with:
         artifacts: publish
         generateReleaseNotes: true;
-        name: ${{ env.version }}
+        name: ${{ env.release }}
         tag: ${{ env.version }}
         token: ${{ secrets.GITHUB_TOKEN }}
