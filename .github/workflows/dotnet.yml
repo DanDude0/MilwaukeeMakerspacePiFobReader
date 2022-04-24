@@ -23,6 +23,10 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Publish
       run: dotnet publish --configuration Release --self-contained -r linux-arm -o publish
+    - name: Zip Release
+      uses: montudor/action-zip@v1
+      with:
+        args: zip -qq -r -j MmsPiFobReader.zip publish
     - name: Make Version Number
       run: |
         echo "release=$(date +'%Y%m%d.%H%M%S') ARM" >> $GITHUB_ENV
@@ -30,7 +34,7 @@ jobs:
     - name: Publish Release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: publish
+        artifacts: MmsPiFobReader.zip
         generateReleaseNotes: true;
         name: ${{ env.release }}
         tag: ${{ env.version }}
