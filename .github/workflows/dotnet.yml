@@ -24,7 +24,7 @@ jobs:
     - name: Publish
       run: dotnet publish --configuration Release --self-contained -r linux-arm -o publish
     - name: Make Version Number
-      run: echo "NOW::$(date +'%Y%m%d.%H%M%S')" " ARM" >> $VERSION
+      run: echo "$(date +'%Y%m%d.%H%M%S') ARM" >> $VERSION
     - name: Publish Release
       uses: ncipollo/release-action@v1
       with:
