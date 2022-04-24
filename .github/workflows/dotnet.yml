@@ -21,8 +21,13 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Publish
       run: dotnet publish --configuration Release --self-contained -r linux-arm -o publish
-    - name: Publish Artifact
-      uses: actions/upload-artifact@3
+    - name: Make Version Number
+      run: echo "NOW::$(date +'%Y%m%d.%H%M%S')" " ARM" >> $VERSION
+    - name: Publish Release
+    - uses: ncipollo/release-action@v1
       with:
-        name: MmsPiFobReader
-        path: publish
+        artifacts: publish
+        generateReleaseNotes: true;
+        name: $VERSION
+        tag: $VERSION
+        token: ${{ secrets.GITHUB_TOKEN }}
