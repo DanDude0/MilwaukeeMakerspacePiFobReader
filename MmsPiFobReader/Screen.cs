@@ -29,10 +29,7 @@ namespace MmsPiFobReader
 			switch (ReaderHardware.Platform) {
 				case HardwareType.OrangePi:
 				case HardwareType.RaspberryPi:
-					if (ReaderHardware.Platform == HardwareType.OrangePi)
 						frameBuffer = new FileStream("/dev/fb0", FileMode.Append);
-					else if (ReaderHardware.Platform == HardwareType.RaspberryPi)
-						frameBuffer = new FileStream("/dev/fb1", FileMode.Append);
 
 					// We're taking over the screen
 					DisableConsole();
