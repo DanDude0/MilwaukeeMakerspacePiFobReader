@@ -15,6 +15,7 @@ namespace MmsPiFobReader
 		private static int cursor;
 		private static int end;
 		private static int size;
+		private static int waiting;
 		private static byte[] buffer;
 
 		public static void Initalize(string device)
@@ -27,30 +28,35 @@ namespace MmsPiFobReader
 		public static string Read()
 		{
 			size = end - cursor;
+			waiting = serialPort.BytesToRead;
 
-			// Fill empty buffer if we have data, reset cursor
-			if (size < 1 && serialPort.BytesToRead != 0) {
-				ret = serialPort.Read(buffer, 0, 256);
+			if (waiting > 0 && end < 128) {
+				// Fill into partial buffer if we have data, and room for it
+				ret = serialPort.Read(buffer, end, 128);
 
-				cursor = 0;
-				end = ret;
-				size = ret;
+				end = end + ret;
 
-				Console.WriteLine($"Received raw RS232 read [{size}]: {Convert.ToBase64String(buffer.AsSpan(0,size))}");
+				Console.WriteLine($"Received raw RS232 read [{size}]: {Convert.ToBase64String(buffer.AsSpan(0, size))}");
 			}
+			else {
+				// Parse the read buffer
+				// Detect start/stop bytes from an RS232 reader
+				if (size > 12 && buffer[cursor] == 0x2 && buffer[cursor + 13] == 0x3) {
+					// Fob id stacked up front
+					// chop off start/stop bytes and CrLf from an RS232 reader
+					output = Encoding.ASCII.GetString(buffer, cursor + 1, 10);
+					cursor += 14;
 
-			// Detect start/stop bytes from an RS232 reader
-			if (size > 0 && buffer[cursor] == 0x2 && buffer[cursor + 13] == 0x3) {
-				// Fob id stacked up front
-				// chop off start/stop bytes and CrLf from an RS232 reader
-				output = Encoding.ASCII.GetString(buffer, cursor + 1, 10);
-				cursor += 14;
-
-				return output;
-			}
-			else if (size > 0) {
-				// Advance the read cursor, try again next time.
-				cursor += 1;
+					return output;
+				}
+				else if (size > 0) {
+					// Advance the read cursor, try again next time.
+					cursor += 1;
+				}
+				else {
+					cursor = 0;
+					end = 0;
+				}
 			}
 
 			// Nothing to read

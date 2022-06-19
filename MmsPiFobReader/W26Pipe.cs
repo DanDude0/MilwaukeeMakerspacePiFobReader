@@ -45,14 +45,16 @@ namespace MmsPiFobReader
 			if (size < 1) {
 				ret = poll(pfd, 1, 5);
 
-				if (ret != 0) {
+				if (ret > 0) {
 					ret = (int)read(fd, r, 256);
 
-					Marshal.Copy(r, buffer, 0, ret);
+					if (ret > 0) {
+						Marshal.Copy(r, buffer, 0, ret);
 
-					cursor = 0;
-					end = ret;
-					size = ret;
+						cursor = 0;
+						end = ret;
+						size = ret;
+					}
 				}
 
 				// Nothing to read
