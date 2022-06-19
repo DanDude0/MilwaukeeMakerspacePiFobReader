@@ -47,7 +47,7 @@ apt-get -y autoremove
 # Update the OS
 heading 'Updating Operating System'
 apt-get -y update
-apt-get -y dist-upgrade
+#apt-get -y dist-upgrade
 
 # Install needed libraries
 heading 'Installing Libraries'
