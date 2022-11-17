@@ -20,7 +20,7 @@ namespace MmsPiFobReader
 		static ReaderResult config;
 
 		// Populated from config settings
-		static bool cabinetMode;
+		static ReaderMode mode;
 		static Dictionary<int, string> cabinetItems;
 		static bool warningBeep;
 		static bool inputCleared;
@@ -324,17 +324,28 @@ namespace MmsPiFobReader
 					if (controller != null) {
 						config = controller.Initialize();
 
-						cabinetMode = false;
+						mode = ReaderMode.Access;
 						warningBeep = true;
 						cabinetItems?.Clear();
 
 						try {
 							var settings = JObject.Parse(config.Settings);
 
-							cabinetMode = settings?["mode"]?.ToString() == "cabinet";
+							switch (settings?["mode"]?.ToString()) {
+								case "cabinet":
+									mode = ReaderMode.Cabinet;
+									break;
+								case "sensor":
+									mode = ReaderMode.Sensor;
+									break;
+								default:
+									mode = ReaderMode.Access;
+									break;
+							}
+
 							warningBeep = (bool?)settings?["warn"] ?? true;
 
-							if (cabinetMode) {
+							if (mode == ReaderMode.Cabinet) {
 								var itemsList = settings?["items"] as JArray;
 
 								if (itemsList == null) {
@@ -436,7 +447,7 @@ namespace MmsPiFobReader
 			key = keyIn;
 			user = newUser;
 
-			if (cabinetMode) {
+			if (mode == ReaderMode.Cabinet) {
 				EnterCabinetMenu();
 			}
 			else {
