@@ -209,5 +209,10 @@ namespace MmsPiFobReader
 				result?.AccessGranted ?? false,
 				details);
 		}
+
+		public void Charge(string key, string details, string description, decimal amount)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

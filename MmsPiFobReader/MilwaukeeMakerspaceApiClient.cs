@@ -98,6 +98,23 @@ namespace MmsPiFobReader
 			result.EnsureSuccessStatusCode();
 		}
 
+		public void Charge(string key, string details, string description, decimal amount)
+		{
+			var action = new ActionRequest {
+				Id = status.Id,
+				Key = key,
+				Type = "Charge",
+				Action = details,
+				Description = description,
+				Amount = amount.ToString(),
+			};
+
+			var request = new StringContent(JsonConvert.SerializeObject(action));
+			var result = client.PostAsync($"reader/action", request).Result;
+
+			result.EnsureSuccessStatusCode();
+		}
+
 		public void DownloadSnapshot()
 		{
 			var result = client.GetAsync($"reader/snapshot").Result;

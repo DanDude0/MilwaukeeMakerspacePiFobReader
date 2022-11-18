@@ -10,6 +10,7 @@ namespace MmsPiFobReader
 	{
 		Access,
 		Cabinet,
-		Sensor
+		Sensor,
+		Charge
 	}
 }

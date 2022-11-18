@@ -23,6 +23,10 @@ namespace MmsPiFobReader
 		static ReaderMode mode;
 		static Dictionary<int, string> cabinetItems;
 		static bool warningBeep;
+		static string chargePrompt;
+		static decimal chargeRate;
+		static ChargeUnit chargeUnit;
+		static DateTime chargeStart = DateTime.MinValue;
 		static bool inputCleared;
 
 		// Set on login
@@ -338,6 +342,9 @@ namespace MmsPiFobReader
 								case "sensor":
 									mode = ReaderMode.Sensor;
 									break;
+								case "charge":
+									mode = ReaderMode.Charge;
+									break;
 								default:
 									mode = ReaderMode.Access;
 									break;
@@ -345,20 +352,47 @@ namespace MmsPiFobReader
 
 							warningBeep = (bool?)settings?["warn"] ?? true;
 
-							if (mode == ReaderMode.Cabinet) {
-								var itemsList = settings?["items"] as JArray;
+							switch (mode) {
+								case ReaderMode.Cabinet:
+									var itemsList = settings?["items"] as JArray;
 
-								if (itemsList == null) {
-									Draw.Fatal("Cannot Read Item List");
+									if (itemsList == null) {
+										Draw.Fatal("Cannot Read Item List");
 
-									continue;
-								}
+										continue;
+									}
 
-								cabinetItems = new Dictionary<int, string>(itemsList.Count);
+									cabinetItems = new Dictionary<int, string>(itemsList.Count);
 
-								foreach (var item in itemsList) {
-									cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
-								}
+									foreach (var item in itemsList) {
+										cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
+									}
+									break;
+								case ReaderMode.Charge:
+									chargePrompt = settings?["prompt"].ToString();
+
+									var rate = settings?["rate"].ToString();
+
+									decimal.TryParse(rate, out var cleanRate);
+
+									chargeRate = cleanRate;
+
+									if (cleanRate < 0.01m || cleanRate > 1000m) {
+										Draw.Fatal("'Rate' is not set to a valid dollar value. Must be between $0.01 and $1000");
+
+										continue;
+									}
+
+									switch (settings?["unit"]?.ToString()) {
+										case "hour":
+											chargeUnit = ChargeUnit.Hour;
+											break;
+										default:
+											chargeUnit = ChargeUnit.Fixed;
+											break;
+									}
+
+									break;
 							}
 						}
 						catch {
@@ -451,6 +485,22 @@ namespace MmsPiFobReader
 				EnterCabinetMenu();
 			}
 			else {
+				if (mode == ReaderMode.Charge) {
+					if (chargeStart == DateTime.MinValue) {
+						if (EnterChargePrompt()) {
+							if (chargeUnit == ChargeUnit.Fixed)
+								controller.Charge(key, $"Accepted Fixed Charge of: '${chargeRate}'", $"Fixed Charge from '{config.Name}'", chargeRate);
+							else
+								chargeStart = DateTime.Now;
+						}
+						else {
+							Draw.Prompt("Charge Refused");
+
+							return;
+						}
+					}
+				}
+
 				expiration = DateTime.Now + new TimeSpan(0, 0, config.Timeout);
 
 				Draw.Status(config.Timeout, false);
@@ -554,6 +604,30 @@ namespace MmsPiFobReader
 						inputBuffer += input;
 						draw = true;
 						break;
+				}
+			}
+		}
+
+		static bool EnterChargePrompt()
+		{
+			Draw.MenuOverride = true;
+			Draw.FullScreenPrompt(chargePrompt);
+
+			while (true) {
+				var input = ReaderHardware.Read();
+
+				if (input.Length != 1)
+					continue;
+
+				switch (input[0]) {
+					case 'A':
+						Draw.MenuOverride = false;
+
+						return false;
+					case 'B':
+						Draw.MenuOverride = false;
+
+						return true;
 				}
 			}
 		}
