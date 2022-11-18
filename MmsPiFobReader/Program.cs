@@ -489,7 +489,7 @@ namespace MmsPiFobReader
 					if (chargeStart == DateTime.MinValue) {
 						if (EnterChargePrompt()) {
 							if (chargeUnit == ChargeUnit.Fixed)
-								controller.Charge(key, $"Accepted Fixed Charge of: '${chargeRate}'", $"Fixed Charge from '{config.Name}'", chargeRate);
+								controller.Charge(key, $"Accepted Fixed Charge of: '${chargeRate.ToString("0.00")}'", $"Fixed Charge from '{config.Name}'", chargeRate);
 							else
 								chargeStart = DateTime.Now;
 						}
@@ -503,6 +503,7 @@ namespace MmsPiFobReader
 
 				expiration = DateTime.Now + new TimeSpan(0, 0, config.Timeout);
 
+				Draw.Heading(config.Name, status.Warning);
 				Draw.Status(config.Timeout, false);
 				Draw.User(user);
 				ReaderHardware.Login();
@@ -520,6 +521,19 @@ namespace MmsPiFobReader
 			ReaderHardware.Logout();
 
 			try {
+				if (mode == ReaderMode.Charge
+					&& chargeStart > DateTime.MinValue
+					&& chargeUnit == ChargeUnit.Hour) {
+					var endDate = DateTime.Now;
+
+					var chargeTimespan = endDate - chargeStart;
+					var chargeAmount = Math.Round((decimal)chargeTimespan.TotalHours * chargeRate, 2, MidpointRounding.ToPositiveInfinity);
+
+					controller.Charge(key, $"Accepted Usage Charge of: '${chargeTimespan.ToString("hh\\:mm\\:ss")}' for '${chargeAmount.ToString("0.00")}'", $"Charged '{chargeTimespan.ToString("hh\\:mm\\:ss")}' time on '{config.Name}'", chargeAmount);
+
+					chargeStart = DateTime.MinValue;
+				}
+
 				controller.Logout(key);
 			}
 			catch (Exception ex) {
