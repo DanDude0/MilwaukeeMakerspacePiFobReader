@@ -91,20 +91,20 @@ namespace MmsPiFobReader
 			);
 
 			if (warning.Length > 0)
-			screen.Mutate(s => s
-				.DrawText(new TextGraphicsOptions {
-					TextOptions = new TextOptions {
-						HorizontalAlignment = HorizontalAlignment.Center,
-						WrapTextWidth = 150,
-						VerticalAlignment = VerticalAlignment.Top,
-					}
-				},
-					warning,
-					tinyFont,
-					white,
-					new PointF(0, 50)
-				)
-			);
+				screen.Mutate(s => s
+					.DrawText(new TextGraphicsOptions {
+						TextOptions = new TextOptions {
+							HorizontalAlignment = HorizontalAlignment.Center,
+							WrapTextWidth = 150,
+							VerticalAlignment = VerticalAlignment.Top,
+						}
+					},
+						warning,
+						tinyFont,
+						white,
+						new PointF(0, 50)
+					)
+				);
 		}
 
 		public static void Status(int seconds, bool draw = true)
@@ -354,6 +354,53 @@ namespace MmsPiFobReader
 					white,
 					new PointF(10, 220)
 					)
+				);
+		}
+
+		public static void FullScreenPrompt(string message)
+		{
+			var lineCount = 1;
+
+			foreach (var c in message)
+				if (c == '\n')
+					lineCount += 1;
+
+			Font font = bigFont;
+
+			screen.Mutate(s => s
+				.Fill(black)
+				.DrawPolygon(
+					blue,
+					10,
+					new PointF(0, 0),
+					new PointF(480, 0),
+					new PointF(480, 319),
+					new PointF(0, 319)
+				)
+				.DrawText(new TextGraphicsOptions {
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 20,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
+				},
+					message,
+					smallerFont,
+					white,
+					new PointF(10, 120)
+				)
+				.DrawText(new TextGraphicsOptions {
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 12,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
+				},
+					$"ESC to Cancel  ENT to Continue",
+					tinyFont,
+					white,
+					new PointF(6, 280)
+				)
 				);
 		}
 	}

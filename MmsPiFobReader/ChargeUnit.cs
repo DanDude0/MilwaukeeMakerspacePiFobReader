@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace MmsPiFobReader
 {
-	public enum ReaderMode
+	public enum ChargeUnit
 	{
-		Access,
-		Cabinet,
-		Sensor,
-		Charge
+		Fixed,
+		Hour
 	}
 }
