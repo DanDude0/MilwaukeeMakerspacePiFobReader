@@ -169,7 +169,7 @@ namespace MmsPiFobReader
 					}
 
 					if (!string.IsNullOrEmpty(output))
-						Console.WriteLine($"Received raw input [{output.Length}]: {Convert.ToBase64String(System.Text.Encoding.Latin1.GetBytes(output))} '{output}'");
+						Log.Message($"Received raw input [{output.Length}]: {Convert.ToBase64String(System.Text.Encoding.Latin1.GetBytes(output))} '{output}'");
 
 					return output;
 				default:

@@ -1,4 +1,5 @@
 using System;
+using Microsoft.VisualBasic;
 using SixLabors.Fonts;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Advanced;
@@ -202,6 +203,8 @@ namespace MmsPiFobReader
 
 		public static void Prompt(string contents)
 		{
+			Log.Message("Draw.Prompt: " + contents);
+
 			if (MenuOverride)
 				return;
 
@@ -246,6 +249,8 @@ namespace MmsPiFobReader
 
 		public static void Fatal(string contents)
 		{
+			Log.Message("Draw.Fatal: " + contents);
+
 			if (MenuOverride)
 				return;
 
@@ -276,6 +281,8 @@ namespace MmsPiFobReader
 
 		public static void Service(string message)
 		{
+			Log.Message("Draw.Service: " + message);
+
 			screen.Mutate(s => s
 				.Fill(black)
 				.DrawPolygon(
@@ -359,6 +366,8 @@ namespace MmsPiFobReader
 
 		public static void FullScreenPrompt(string message)
 		{
+			Log.Message("Draw.FullScreenPrompt: " + message);
+
 			var lineCount = 1;
 
 			foreach (var c in message)

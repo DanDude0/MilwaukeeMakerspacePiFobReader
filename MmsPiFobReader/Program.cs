@@ -228,7 +228,7 @@ namespace MmsPiFobReader
 					}
 				}
 				else if (input.Length > 0) {
-					Console.WriteLine($"Received input unknown [{input.Length}]: {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(input))} '{input}'");
+					Log.Message($"Received input unknown [{input.Length}]: {Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(input))} '{input}'");
 				}
 			}
 		}
@@ -317,6 +317,7 @@ namespace MmsPiFobReader
 						// Fall back to a local snapshot database if one exists.
 						controller?.Dispose();
 						controller = new LocalController(status);
+						Log.Message("Falling back to local snapshot database.");
 					}
 					catch {
 						// Wait some more, and loop around
@@ -395,8 +396,10 @@ namespace MmsPiFobReader
 									break;
 							}
 						}
-						catch {
-							// Do Nothing
+						catch  (Exception ex) {
+							// Not a fatal error, try to keep going on the initialization.
+							Log.Message("Error parsing reader settings.");
+							Log.Exception(ex);
 						}
 
 						// Exit the loop after we've setup everything
@@ -507,6 +510,7 @@ namespace MmsPiFobReader
 				Draw.Status(config.Timeout, false);
 				Draw.User(user);
 				ReaderHardware.Login();
+				Log.Message("Login");
 			}
 		}
 
@@ -519,6 +523,7 @@ namespace MmsPiFobReader
 			ClearEntry();
 
 			ReaderHardware.Logout();
+			Log.Message("Logout");
 
 			try {
 				if (mode == ReaderMode.Charge
@@ -529,7 +534,7 @@ namespace MmsPiFobReader
 					var chargeTimespan = endDate - chargeStart;
 					var chargeAmount = Math.Round((decimal)chargeTimespan.TotalHours * chargeRate, 2, MidpointRounding.ToPositiveInfinity);
 
-					controller.Charge(key, $"Accepted Usage Charge of: '${chargeTimespan.ToString("hh\\:mm\\:ss")}' for '${chargeAmount.ToString("0.00")}'", $"Charged '{chargeTimespan.ToString("hh\\:mm\\:ss")}' time on '{config.Name}'", chargeAmount);
+					controller.Charge(key, $"Accepted Usage Charge of: '${chargeAmount.ToString("0.00")}' for '{chargeTimespan.ToString("hh\\:mm\\:ss")}'", $"Charged '{chargeTimespan.ToString("hh\\:mm\\:ss")}' time on '{config.Name}'", chargeAmount);
 
 					chargeStart = DateTime.MinValue;
 				}
@@ -541,6 +546,7 @@ namespace MmsPiFobReader
 
 				switch (ex.InnerException) {
 					case HttpRequestException e when e.Message == "Response status code does not indicate success: 500 (Internal Server Error).":
+						Log.Message("Breaking for server error");
 						break;
 					default:
 						Connect();
@@ -555,6 +561,8 @@ namespace MmsPiFobReader
 		{
 			var draw = true;
 			var inputBuffer = "";
+
+			Log.Message("Entering Cabinet Menu");
 
 			if (cabinetItems == null) {
 				Draw.MenuOverride = false;
@@ -636,10 +644,12 @@ namespace MmsPiFobReader
 				switch (input[0]) {
 					case 'A':
 						Draw.MenuOverride = false;
+						Log.Message("Rejected Charge");
 
 						return false;
 					case 'B':
 						Draw.MenuOverride = false;
+						Log.Message("Accepted Charge");
 
 						return true;
 				}
@@ -648,6 +658,7 @@ namespace MmsPiFobReader
 
 		static void EnterServiceMenu()
 		{
+			Log.Message("Entering Service Menu");
 			UpdateStatus();
 
 			var draw = true;
@@ -683,6 +694,7 @@ Snapshot: {status.LocalSnapshot}
 						Draw.MenuOverride = false;
 
 						Draw.Loading("Reconnecting");
+						Log.Message("Exiting Service Menu");
 
 						return;
 					case '1':
@@ -698,14 +710,19 @@ Snapshot: {status.LocalSnapshot}
 						if (trigger) {
 							trigger = false;
 							ReaderHardware.Logout();
+							Log.Message("Toggle Trigger - Off");
 						}
 						else {
 							trigger = true;
 							ReaderHardware.Login();
+							Log.Message("Toggle Trigger - On");
 						}
 
 						break;
 					case '5':
+						Draw.Loading("Updating Software, please wait.");
+						Log.Message("Updating Software");
+
 						switch (ReaderHardware.Platform) {
 							case HardwareType.OrangePi:
 								Process.Start("bash", "-c \"cd /tmp; rm -f installOPi.sh; wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh; chmod +x installOPi.sh; sudo ./installOPi.sh\"");
@@ -720,33 +737,43 @@ Snapshot: {status.LocalSnapshot}
 						Environment.Exit(0);
 						break;
 					case '6':
+						Log.Message("Rebooting");
+
 						Process.Start("reboot");
 						Process.Start("systemctl", "stop MmsPiW26Interface");
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 					case '7':
+						Log.Message("Shutdown");
+
 						Process.Start("shutdown", "-hP 0");
 						Process.Start("systemctl", "stop MmsPiW26Interface");
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 					case '8':
+						Log.Message("Exiting");
+
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
 					case '9':
 						Draw.Loading("Downloading Database Snapshot");
+						Log.Message("Downloading Database Snapshot");
 						//TODO: If we can talk to the server, push attempt history back up BEFORE we overwrite it.
 						try {
 							server.DownloadSnapshot();
 
 							Draw.Service("Snapshot updated");
+							Log.Message("Snapshot updated");
 
 							Thread.Sleep(2000);
 						}
-						catch {
+						catch (Exception ex) {
 							Draw.Service("Could not download snapshot");
+							Log.Message("Could not download snapshot");
+							Log.Exception(ex);
 
 							Thread.Sleep(2000);
 						}
@@ -791,6 +818,7 @@ Reader Id: {inputBuffer}
 						if (id > 0) {
 							status.Id = id;
 							File.WriteAllText("readerid.txt", inputBuffer);
+							Log.Message($"Set reader id to: {id}");
 						}
 
 						return;
@@ -862,6 +890,7 @@ Server: {complete}
 						}
 						else {
 							File.WriteAllText("server.txt", complete);
+							Log.Message($"Set server to: {complete}");
 							return;
 						}
 						break;
