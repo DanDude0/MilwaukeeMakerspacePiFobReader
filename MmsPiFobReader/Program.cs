@@ -676,10 +676,8 @@ Snapshot: {status.LocalSnapshot}
 
 [1] Set Reader Id	[2] Set Server
 [3] Test Cabinet   [4] Toggle Trigger
-[5] Update Reader	[6] Reboot Reader
-[7] Shutdown Reader   [8] Exit App
-[9] Download Snapshot");
-
+[5] Update Reader	[6] Push Log Dump
+[9] Next Page");
 
 					draw = false;
 				}
@@ -737,6 +735,46 @@ Snapshot: {status.LocalSnapshot}
 						Environment.Exit(0);
 						break;
 					case '6':
+						PushLogDump();
+						break;
+					case '9':
+						EnterServiceMenu2();
+						break;
+				}
+
+				draw = true;
+			}
+		}
+
+		static void EnterServiceMenu2()
+		{
+			Log.Message("Entering Service Menu 2nd Page");
+
+			var draw = true;
+
+			while (true) {
+				if (draw) {
+					Draw.MenuOverride = true;
+					Draw.Service($@"[1] Reboot Reader   [2] Shutdown Reader
+[3] Exit App
+[4] Download Offline Database Snapshot
+[5] Delete Offline Database Snapshot
+[0] Previous Page");
+
+					draw = false;
+				}
+
+				var input = ReaderHardware.Read();
+
+				if (input.Length != 1)
+					continue;
+
+				switch (input[0]) {
+					case '0':
+						Log.Message("Exiting Service Menu 2nd Page");
+
+						return;
+					case '1':
 						Log.Message("Rebooting");
 
 						Process.Start("reboot");
@@ -744,7 +782,7 @@ Snapshot: {status.LocalSnapshot}
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
-					case '7':
+					case '2':
 						Log.Message("Shutdown");
 
 						Process.Start("shutdown", "-hP 0");
@@ -752,13 +790,13 @@ Snapshot: {status.LocalSnapshot}
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
-					case '8':
+					case '3':
 						Log.Message("Exiting");
 
 						Process.Start("systemctl", "stop MmsPiFobReader");
 						Environment.Exit(0);
 						break;
-					case '9':
+					case '4':
 						Draw.Loading("Downloading Database Snapshot");
 						Log.Message("Downloading Database Snapshot");
 						//TODO: If we can talk to the server, push attempt history back up BEFORE we overwrite it.
@@ -773,6 +811,28 @@ Snapshot: {status.LocalSnapshot}
 						catch (Exception ex) {
 							Draw.Service("Could not download snapshot");
 							Log.Message("Could not download snapshot");
+							Log.Exception(ex);
+
+							Thread.Sleep(2000);
+						}
+
+						UpdateStatus();
+						break;
+					case '5':
+						Draw.Loading("Deleting Database Snapshot");
+						Log.Message("Deleting Database Snapshot");
+						//TODO: If we can talk to the server, push attempt history back up BEFORE we overwrite it.
+						try {
+							File.Delete(LocalController.FileName);
+
+							Draw.Service("Snapshot deleted");
+							Log.Message("Snapshot deleted");
+
+							Thread.Sleep(2000);
+						}
+						catch (Exception ex) {
+							Draw.Service("Could not delete snapshot");
+							Log.Message("Could not delete snapshot");
 							Log.Exception(ex);
 
 							Thread.Sleep(2000);
@@ -923,6 +983,11 @@ Server: {complete}
 
 			status.Kernel = GetCommandOutput("uname", "-a");
 			status.Uptime = GetCommandOutput("uptime", "");
+		}
+
+		static void PushLogDump()
+		{
+			//TODO
 		}
 
 		static string GetCommandOutput(string command, string arguements)
