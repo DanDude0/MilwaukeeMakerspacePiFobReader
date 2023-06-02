@@ -11,6 +11,7 @@ namespace MmsPiFobReader
 		Access,
 		Cabinet,
 		Sensor,
-		Charge
+		Charge,
+		Modbus
 	}
 }

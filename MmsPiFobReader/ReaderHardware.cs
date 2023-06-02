@@ -28,6 +28,8 @@ namespace MmsPiFobReader
 		private static int ledPin = 0;
 		private static int beeperPin = 0;
 
+		private static int transmitEnablePin = 0;
+
 		public static void Initialize()
 		{
 			// Default to SDL interface for cross platform desktop support
@@ -110,6 +112,7 @@ namespace MmsPiFobReader
 					triggerPin = 9;
 					ledPin = 200;
 					beeperPin = 201;
+					transmitEnablePin = 68;
 					break;
 				case HardwareType.RaspberryPi:
 					RS232Port.Initalize("/dev/serial0");
@@ -125,6 +128,7 @@ namespace MmsPiFobReader
 					triggerPin = 13;
 					ledPin = 12;
 					beeperPin = 16;
+					transmitEnablePin = 23;
 					break;
 			}
 
@@ -147,6 +151,7 @@ namespace MmsPiFobReader
 					gpio.OpenPin(triggerPin, PinMode.Output);
 					gpio.OpenPin(ledPin, PinMode.Output);
 					gpio.OpenPin(beeperPin, PinMode.Output);
+					gpio.OpenPin(transmitEnablePin, PinMode.Output);
 					break;
 			}
 
@@ -222,6 +227,7 @@ namespace MmsPiFobReader
 						new PinValuePair(triggerPin, PinValue.High),
 						new PinValuePair(ledPin, PinValue.High),
 						new PinValuePair(beeperPin, PinValue.Low),
+						new PinValuePair(transmitEnablePin, PinValue.High)
 					});
 					break;
 			}
