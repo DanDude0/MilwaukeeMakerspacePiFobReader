@@ -346,6 +346,9 @@ namespace MmsPiFobReader
 								case "charge":
 									mode = ReaderMode.Charge;
 									break;
+								case "modbus":
+									mode = ReaderMode.Modbus;
+									break;
 								default:
 									mode = ReaderMode.Access;
 									break;
