@@ -2,6 +2,8 @@ using System;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using SDL2;
 
@@ -11,6 +13,8 @@ namespace MmsPiFobReader
 	{
 		public static HardwareType Platform { get; private set; }
 		public static ScreenType Screen { get; private set; }
+
+		private static bool modbus_mode = false;
 
 		private static GpioController gpio;
 
@@ -169,7 +173,7 @@ namespace MmsPiFobReader
 				case HardwareType.RaspberryPi:
 					var output = W26Pipe.Read();
 
-					if (string.IsNullOrEmpty(output)) {
+					if (string.IsNullOrEmpty(output) && !modbus_mode) {
 						output = RS232Port.Read();
 					}
 
@@ -319,6 +323,67 @@ namespace MmsPiFobReader
 					break;
 			}
 		}
+
+		public static void SetModBusMode()
+		{
+			RS232Port.Close();
+			switch (Platform) {
+				case HardwareType.OrangePi:
+					MODBUSPort.Initalize("/dev/ttyS3", gpio, transmitEnablePin);
+					break;
+				case HardwareType.RaspberryPi:
+					MODBUSPort.Initalize("/dev/serial0", gpio, transmitEnablePin);
+					break;
+			}
+			modbus_mode = true;
+		}
+
+		public static bool ModbusOutput(int board_id)
+		{
+			byte[] msg = new byte[8];
+			msg[0] = (byte)board_id; // dest id,
+			msg[1] = 5; // 0x05 = function (write single coil)
+			msg[2] = 0; // coil addr high byte
+			msg[3] = 0; // coil addr low byte
+			msg[4] = 255; // 0xFF value high byte (0xFF in high byte = set)
+			msg[5] = 0; // 0x00 value low byte, (0xFF in low byte = clear)
+			byte[] crc = CRC16_MODBUS.fn_makeCRC16_byte(msg, 2); 
+			msg[6] = crc[0]; 
+			msg[7] = crc[1];
+			byte[] response = MODBUSPort.ModBusMessage(msg, 1000);
+			if (response == null) {
+				return false;
+			}
+			return Enumerable.SequenceEqual(msg, response);
+		}
+
+		[MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
+		public static int ModbusInput(int board_id, int input_ch)
+		{
+			if (input_ch < 1 || input_ch > 2) { return -1; }
+			input_ch--;
+			byte[] msg = new byte[8];
+			msg[0] = (byte)board_id;
+			msg[1] = 2;
+			msg[2] = 0;
+			msg[3] = 0;
+			msg[4] = 0;
+			msg[5] = 2;
+			byte[] crc = CRC16_MODBUS.fn_makeCRC16_byte(msg, 2);
+			msg[6] = crc[0];
+			msg[7] = crc[1];
+			byte[] response = MODBUSPort.ModBusMessage(msg, 1000);
+			if (response == null) { return -1; }
+			if (response.Length != 6) { return -1; }
+			byte inputs = response[3];
+			if (((inputs >> input_ch) & 1) != 0) {
+				return 1;
+			}
+			else {
+				return 0;
+			}
+		}
+
 
 		private static Thread warningThread;
 		private static int WarningLength;

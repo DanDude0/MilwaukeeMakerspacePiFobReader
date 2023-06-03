@@ -372,6 +372,22 @@ namespace MmsPiFobReader
 										cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
 									}
 									break;
+								case ReaderMode.Modbus:
+									ReaderHardware.SetModBusMode();
+									itemsList = settings?["items"] as JArray;
+
+									if (itemsList == null) {
+										Draw.Fatal("Cannot Read Item List");
+
+										continue;
+									}
+
+									cabinetItems = new Dictionary<int, string>(itemsList.Count);
+
+									foreach (var item in itemsList) {
+										cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
+									}
+									break;
 								case ReaderMode.Charge:
 									chargePrompt = settings?["prompt"].ToString();
 
@@ -487,7 +503,7 @@ namespace MmsPiFobReader
 			key = keyIn;
 			user = newUser;
 
-			if (mode == ReaderMode.Cabinet) {
+			if (mode == ReaderMode.Cabinet | mode == ReaderMode.Modbus) {
 				EnterCabinetMenu();
 			}
 			else {
@@ -615,9 +631,56 @@ namespace MmsPiFobReader
 							Draw.Heading(config.Name, status.Warning);
 							Draw.Prompt($"Selected: {item}");
 							controller.Action(key, item);
-							ReaderHardware.Output(code);
-							Thread.Sleep(1000);
-							ReaderHardware.Output(0);
+							if (mode == ReaderMode.Cabinet) {
+								ReaderHardware.Output(code);
+								Thread.Sleep(1000);
+								ReaderHardware.Output(0);
+							} else if (mode == ReaderMode.Modbus) {
+								bool result = false;
+								int attempts = 0;
+								do {
+									result = ReaderHardware.ModbusOutput(code);
+									attempts++;
+
+									if (!result)
+										ReaderHardware.Warn(1);
+
+									if (attempts == 5) {
+										Draw.Fatal($"Communication with endpoint {code} failed!");
+										Thread.Sleep(5000);
+										break;
+									}
+
+								} while (!result);
+
+								if (result) {
+									Thread.Sleep(1000);
+									var latchStatus = -1;
+									attempts = 0;
+									do {
+										latchStatus = ReaderHardware.ModbusInput(code, 1);
+										attempts++;
+
+										if (latchStatus == -1)
+											ReaderHardware.Warn(1);
+
+										if (attempts == 5) {
+											Draw.Fatal($"Communication with endpoint {code} failed!");
+											Thread.Sleep(5000);
+											break;
+										}
+
+									} while (latchStatus == -1);
+									
+									if (latchStatus == 1) {
+										Draw.Fatal($"Could not verify latch {code} opened.");
+										ReaderHardware.Warn(5);
+										Thread.Sleep(5000);
+									}
+								}
+									
+							}
+							
 							return;
 						}
 						else {
