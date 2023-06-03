@@ -59,8 +59,14 @@ namespace MmsPiFobReader
 				}
 			}
 
+
 			// Nothing to read
 			return "";
+		}
+
+		public static void Close()
+		{
+			serialPort.Close();
 		}
 	}
 }
