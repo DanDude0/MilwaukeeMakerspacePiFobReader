@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Newtonsoft.Json.Linq;
+using Rssdp.Infrastructure;
 
 namespace MmsPiFobReader
 {
@@ -358,35 +359,16 @@ namespace MmsPiFobReader
 
 							switch (mode) {
 								case ReaderMode.Cabinet:
-									var itemsList = settings?["items"] as JArray;
-
-									if (itemsList == null) {
-										Draw.Fatal("Cannot Read Item List");
-
+									if (!ParseCabinetMenu(settings))
 										continue;
-									}
 
-									cabinetItems = new Dictionary<int, string>(itemsList.Count);
-
-									foreach (var item in itemsList) {
-										cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
-									}
 									break;
 								case ReaderMode.Modbus:
 									ReaderHardware.SetModBusMode();
-									itemsList = settings?["items"] as JArray;
 
-									if (itemsList == null) {
-										Draw.Fatal("Cannot Read Item List");
-
+									if (!ParseCabinetMenu(settings))
 										continue;
-									}
 
-									cabinetItems = new Dictionary<int, string>(itemsList.Count);
-
-									foreach (var item in itemsList) {
-										cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
-									}
 									break;
 								case ReaderMode.Charge:
 									chargePrompt = settings?["prompt"].ToString();
@@ -433,6 +415,25 @@ namespace MmsPiFobReader
 					Thread.Sleep(10000);
 				}
 			}
+		}
+
+		static bool ParseCabinetMenu(JObject settings)
+		{
+			var itemsList = settings?["items"] as JArray;
+
+			if (itemsList == null) {
+				Draw.Fatal("Cannot Read Item List");
+
+				return false;
+			}
+
+			cabinetItems = new Dictionary<int, string>(itemsList.Count);
+
+			foreach (var item in itemsList) {
+				cabinetItems.Add(int.Parse(item?["id"].ToString()), item?["name"].ToString());
+			}
+
+			return true;
 		}
 
 		static void ClearEntry()
@@ -1015,6 +1016,7 @@ Server: {complete}
 							segments[currentSegment] = "_";
 						}
 						else {
+							status.Server = complete;
 							File.WriteAllText("server.txt", complete);
 							Log.Message($"Set server to: {complete}");
 							return;
