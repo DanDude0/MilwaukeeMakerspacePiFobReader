@@ -261,6 +261,14 @@ Follow the directions on screen. This install can take a LONG time, probably ove
 
 If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
 	
+## Upgrade an existing install
+
+Run this command, it will do an inplace upgrade and reboot the reader automatically
+
+	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/upgrade.sh
+	chmod +x upgrade.sh
+	sudo ./upgrade.sh
+
 ### Assembly
 
 TODO: Document assembly
