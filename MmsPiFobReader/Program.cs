@@ -397,7 +397,7 @@ namespace MmsPiFobReader
 									break;
 							}
 						}
-						catch  (Exception ex) {
+						catch (Exception ex) {
 							// Not a fatal error, try to keep going on the initialization.
 							Log.Message("Error parsing reader settings.");
 							Log.Exception(ex);
@@ -595,17 +595,11 @@ namespace MmsPiFobReader
 
 			Draw.MenuOverride = true;
 
+			Draw.Cabinet("Enter the number of tool to unlock");
+
 			while (true) {
 				if (draw) {
-					var menu = "";
-
-					foreach (var item in cabinetItems) {
-						menu += $"[{item.Key}] {item.Value}\n";
-					}
-
-					var entry = $"\nSelect a tool: {inputBuffer}";
-
-					Draw.Cabinet(menu, entry);
+					Draw.CabinetEntry(inputBuffer);
 
 					draw = false;
 				}
@@ -619,6 +613,13 @@ namespace MmsPiFobReader
 					case 'A':
 						if (inputBuffer.Length > 0)
 							inputBuffer = inputBuffer.Substring(0, inputBuffer.Length - 1);
+						else {
+							Draw.MenuOverride = false;
+							Draw.Loading($"Cancelled tool selection");
+							Thread.Sleep(1000);
+
+							return;
+						}
 
 						draw = true;
 						break;
@@ -629,14 +630,14 @@ namespace MmsPiFobReader
 							var item = cabinetItems[code];
 
 							Draw.MenuOverride = false;
-							Draw.Heading(config.Name, status.Warning);
-							Draw.Prompt($"Selected: {item}");
+							Draw.Loading($"Selected: {item}");
 							controller.Action(key, item);
 							if (mode == ReaderMode.Cabinet) {
 								ReaderHardware.Output(code);
 								Thread.Sleep(1000);
 								ReaderHardware.Output(0);
-							} else if (mode == ReaderMode.Modbus) {
+							}
+							else if (mode == ReaderMode.Modbus) {
 								bool result = false;
 								int attempts = 0;
 								do {
@@ -672,25 +673,27 @@ namespace MmsPiFobReader
 										}
 
 									} while (latchStatus == -1);
-									
+
 									if (latchStatus == 1) {
 										Draw.Fatal($"Could not verify latch {code} opened.");
 										ReaderHardware.Warn(5);
 										Thread.Sleep(5000);
 									}
 								}
-									
+
 							}
-							
+
 							return;
 						}
 						else {
 							inputBuffer = "";
-							draw = true;
+							Draw.CabinetPrompt("Invalid Tool Number");
 						}
 						break;
 					default:
-						inputBuffer += input;
+						if (inputBuffer.Length < 6)
+							inputBuffer += input;
+
 						draw = true;
 						break;
 				}

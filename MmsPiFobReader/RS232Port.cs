@@ -66,7 +66,7 @@ namespace MmsPiFobReader
 
 		public static void Close()
 		{
-			serialPort.Close();
+			serialPort?.Close();
 		}
 	}
 }

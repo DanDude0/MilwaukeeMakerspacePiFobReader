@@ -308,24 +308,9 @@ namespace MmsPiFobReader
 				);
 		}
 
-		public static void Cabinet(string message, string entry)
+		public static void Cabinet(string message)
 		{
-			var lineCount = 1;
-
-			foreach (var c in message)
-				if (c == '\n')
-					lineCount += 1;
-
-			Font font = tinyFont;
-
-			if (lineCount > 11)
-				font = new Font(tinyFont, 21);
-			else if (lineCount > 10)
-				font = new Font(tinyFont, 23);
-			else if (lineCount > 9)
-				font = new Font(tinyFont, 26);
-			else if (lineCount > 8)
-				font = new Font(tinyFont, 28);
+			Font font = bigFont;
 
 			screen.Mutate(s => s
 				.Fill(black)
@@ -339,7 +324,7 @@ namespace MmsPiFobReader
 				)
 				.DrawText(new TextGraphicsOptions {
 					TextOptions = new TextOptions {
-						HorizontalAlignment = HorizontalAlignment.Left,
+						HorizontalAlignment = HorizontalAlignment.Center,
 						WrapTextWidth = 480 - 20,
 						VerticalAlignment = VerticalAlignment.Top,
 					}
@@ -348,18 +333,54 @@ namespace MmsPiFobReader
 					font,
 					white,
 					new PointF(10, 7)
-					)
+				)
+				.DrawPolygon(
+					grey,
+					2,
+					new PointF(20, 160),
+					new PointF(460, 160),
+					new PointF(460, 299),
+					new PointF(20, 299)
+				)
+				);
+		}
+
+		public static void CabinetPrompt(string contents)
+		{
+			Log.Message("Draw.CabinetPrompt: " + contents);
+
+			screen.Mutate(s => s
+				.Fill(red, new RectangleF(21, 161, 438, 137))
 				.DrawText(new TextGraphicsOptions {
 					TextOptions = new TextOptions {
-						HorizontalAlignment = HorizontalAlignment.Left,
-						WrapTextWidth = 480 - 20,
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 42,
+						VerticalAlignment = VerticalAlignment.Center,
+					}
+				},
+					contents,
+					littleFont,
+					white,
+					new PointF(21, 223)
+					)
+				);
+		}
+
+		public static void CabinetEntry(string contents)
+		{
+			screen.Mutate(s => s
+				.Fill(black, new RectangleF(21, 161, 438, 137))
+				.DrawText(new TextGraphicsOptions {
+					TextOptions = new TextOptions {
+						HorizontalAlignment = HorizontalAlignment.Center,
+						WrapTextWidth = 480 - 42,
 						VerticalAlignment = VerticalAlignment.Top,
 					}
 				},
-					entry,
-					smallerFont,
+					contents,
+					hugeFont,
 					white,
-					new PointF(10, 220)
+					new PointF(21, 162)
 					)
 				);
 		}
