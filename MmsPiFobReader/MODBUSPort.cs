@@ -30,6 +30,12 @@ namespace MmsPiFobReader
 
 		public static byte[] ModBusMessage(byte[] outgoing, int timeout_ms)
 		{
+			if (gpio == null) {
+				Log.Message("MODBUSPort tried to send message when it was not initialized");
+
+				return null;
+			}
+
 			byte[] response = new byte[256]; // maximum modbus packet length
 			try {
 				gpio.Write(transmitEnablePin, PinValue.High);
