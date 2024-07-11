@@ -51,10 +51,7 @@ namespace MmsPiFobReader
 				LIMIT 1",
 				status.Id);
 
-			if (result == null)
-				throw new Exception("Could not find reader id");
-
-			return result;
+			return result ?? throw new Exception("Could not find reader id");
 		}
 
 		public AuthenticationResult Authenticate(string key)

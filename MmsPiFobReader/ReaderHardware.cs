@@ -13,6 +13,7 @@ namespace MmsPiFobReader
 	{
 		public static HardwareType Platform { get; private set; }
 		public static ScreenType Screen { get; private set; }
+		public static bool InvertScreen;
 
 		private static bool modbus_mode = false;
 

@@ -16,6 +16,7 @@ namespace MmsPiFobReader
 		Image<Bgr565> buffer = new Image<Bgr565>(480, 320);
 		byte[] currentFrame = new byte[480 * 320 * 2];
 		byte[] pendingFrame = new byte[480 * 320 * 2];
+		byte[] rotationFrame = new byte[480 * 320 * 2];
 		FileStream frameBuffer;
 		object frameLock = new object();
 		IntPtr window;
@@ -87,8 +88,21 @@ namespace MmsPiFobReader
 
 		private unsafe void Draw()
 		{
+
 			lock (frameLock) {
-				buffer.CopyPixelDataTo(pendingFrame);
+				if (ReaderHardware.InvertScreen) {
+					buffer.CopyPixelDataTo(rotationFrame);
+
+					for (int row = 0; row < 320; row += 1) {
+						for (int col = 0; col < 960; col += 2) {
+							pendingFrame[(319 - row) * 960 + (958 - col)] = rotationFrame[row * 960 + col];
+							pendingFrame[(319 - row) * 960 + (958 - col) + 1] = rotationFrame[row * 960 + col + 1];
+						}
+					}
+				}
+				else
+					buffer.CopyPixelDataTo(pendingFrame);
+
 				frameReady = true;
 			}
 

@@ -335,6 +335,18 @@ namespace MmsPiFobReader
 						cabinetItems?.Clear();
 
 						try {
+							if (config?.InvertScreen == true) {
+								ReaderHardware.InvertScreen = true;
+
+								File.WriteAllText("invertscreen.txt", "");
+							}
+							else {
+								ReaderHardware.InvertScreen = false;
+
+								if (File.Exists("invertscreen.txt"))
+									File.Delete("invertscreen.txt");
+							}
+
 							var settings = JObject.Parse(config.Settings);
 
 							switch (settings?["mode"]?.ToString()) {
@@ -524,10 +536,10 @@ namespace MmsPiFobReader
 					}
 				}
 
-				expiration = DateTime.Now + new TimeSpan(0, 0, config.Timeout);
+				expiration = DateTime.Now + new TimeSpan(0, 0, 0, 0, (int)(config.Timeout * 1000));
 
 				Draw.Heading(config.Name, status.Warning);
-				Draw.Status(config.Timeout, false);
+				Draw.Status((int)config.Timeout, false);
 				Draw.User(user);
 				ReaderHardware.Login();
 				Log.Message("Login");
@@ -1051,6 +1063,11 @@ Server: {complete}
 
 			if (File.Exists(LocalController.FileName))
 				status.LocalSnapshot = "Yes, " + GetCommandOutput("ls -l", LocalController.FileName);
+
+			if (File.Exists("invertscreen.txt"))
+				ReaderHardware.InvertScreen = true;
+			else
+				ReaderHardware.InvertScreen = false;
 
 			status.Kernel = GetCommandOutput("uname", "-a");
 			status.Uptime = GetCommandOutput("uptime", "");
