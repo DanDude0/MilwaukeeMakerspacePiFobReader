@@ -28,6 +28,19 @@ namespace MmsPiFobReader
 		private static int address6Pin = 0;
 		private static int address7Pin = 0;
 
+		private static int legacyE1Trigger = 0;
+		private static int legacyE2Trigger = 0;
+		private static int legacyE3Trigger = 0;
+		private static int legacyE4Trigger = 0;
+		private static int legacyE5Trigger = 0;
+		private static int legacyE6Trigger = 0;
+		private static int legacyE7Trigger = 0;
+		private static int legacyE8Trigger = 0;
+		private static int legacyE9Trigger = 0;
+		private static int legacyE10Trigger = 0;
+		private static int legacyE11Trigger = 0;
+		private static int legacyE12Trigger = 0;
+
 		private static int triggerPin = 0;
 
 		private static int ledPin = 0;
@@ -118,6 +131,20 @@ namespace MmsPiFobReader
 					ledPin = 200;
 					beeperPin = 201;
 					transmitEnablePin = 68;
+
+					legacyE1Trigger = 11;
+					legacyE2Trigger = 6;
+					legacyE3Trigger = 13;
+					legacyE4Trigger = 14;
+					legacyE5Trigger = 0;
+					legacyE6Trigger = 3;
+					legacyE7Trigger = 68;
+					legacyE8Trigger = 7;
+					legacyE9Trigger = 8;
+					legacyE10Trigger = 9;
+					legacyE11Trigger = 10;
+					legacyE12Trigger = 20;
+
 					break;
 				case HardwareType.RaspberryPi:
 					RS232Port.Initalize("/dev/serial0");
@@ -134,6 +161,20 @@ namespace MmsPiFobReader
 					ledPin = 12;
 					beeperPin = 16;
 					transmitEnablePin = 23;
+
+					legacyE1Trigger = 3;
+					legacyE2Trigger = 4;
+					legacyE3Trigger = 14;
+					legacyE4Trigger = 15;
+					legacyE5Trigger = 27;
+					legacyE6Trigger = 22;
+					legacyE7Trigger = 23;
+					legacyE8Trigger = 5;
+					legacyE9Trigger = 6;
+					legacyE10Trigger = 13;
+					legacyE11Trigger = 19;
+					legacyE12Trigger = 26;
+
 					break;
 			}
 
@@ -303,6 +344,70 @@ namespace MmsPiFobReader
 			}
 		}
 
+		public static void LegacyCabinetOutput(int i)
+		{
+			switch (Platform) {
+				case HardwareType.OrangePi:
+				case HardwareType.RaspberryPi:
+					gpio.Write(new PinValuePair[] {
+						new PinValuePair(legacyE1Trigger, PinValue.Low),
+						new PinValuePair(legacyE2Trigger, PinValue.Low),
+						new PinValuePair(legacyE3Trigger, PinValue.Low),
+						new PinValuePair(legacyE4Trigger, PinValue.Low),
+						new PinValuePair(legacyE5Trigger, PinValue.Low),
+						new PinValuePair(legacyE6Trigger, PinValue.Low),
+						new PinValuePair(legacyE7Trigger, PinValue.Low),
+						new PinValuePair(legacyE8Trigger, PinValue.Low),
+						new PinValuePair(legacyE9Trigger, PinValue.Low),
+						new PinValuePair(legacyE10Trigger, PinValue.Low),
+						new PinValuePair(legacyE11Trigger, PinValue.Low),
+						new PinValuePair(legacyE12Trigger, PinValue.Low),
+						new PinValuePair(ledPin, PinValue.Low),
+						new PinValuePair(beeperPin, PinValue.Low),
+					});
+
+					switch (i) {
+						case 1:
+							gpio.Write(legacyE1Trigger, PinValue.High);
+							break;
+						case 2:
+							gpio.Write(legacyE2Trigger, PinValue.High);
+							break;
+						case 3:
+							gpio.Write(legacyE3Trigger, PinValue.High);
+							break;
+						case 4:
+							gpio.Write(legacyE4Trigger, PinValue.High);
+							break;
+						case 5:
+							gpio.Write(legacyE5Trigger, PinValue.High);
+							break;
+						case 6:
+							gpio.Write(legacyE6Trigger, PinValue.High);
+							break;
+						case 7:
+							gpio.Write(legacyE7Trigger, PinValue.High);
+							break;
+						case 8:
+							gpio.Write(legacyE8Trigger, PinValue.High);
+							break;
+						case 9:
+							gpio.Write(legacyE9Trigger, PinValue.High);
+							break;
+						case 10:
+							gpio.Write(legacyE10Trigger, PinValue.High);
+							break;
+						case 11:
+							gpio.Write(legacyE11Trigger, PinValue.High);
+							break;
+						case 12:
+							gpio.Write(legacyE12Trigger, PinValue.High);
+							break;
+					}
+					break;
+			}
+		}
+
 		public static void Warn(int seconds)
 		{
 			switch (Platform) {
@@ -348,8 +453,8 @@ namespace MmsPiFobReader
 			msg[3] = 0; // coil addr low byte
 			msg[4] = 255; // 0xFF value high byte (0xFF in high byte = set)
 			msg[5] = 0; // 0x00 value low byte, (0xFF in low byte = clear)
-			byte[] crc = CRC16_MODBUS.fn_makeCRC16_byte(msg, 2); 
-			msg[6] = crc[0]; 
+			byte[] crc = CRC16_MODBUS.fn_makeCRC16_byte(msg, 2);
+			msg[6] = crc[0];
 			msg[7] = crc[1];
 			byte[] response = MODBUSPort.ModBusMessage(msg, 1000);
 			if (response == null) {

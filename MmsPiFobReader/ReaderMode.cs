@@ -9,6 +9,7 @@ namespace MmsPiFobReader
 	public enum ReaderMode
 	{
 		Access,
+		LegacyCabinet,
 		Cabinet,
 		Sensor,
 		Charge,

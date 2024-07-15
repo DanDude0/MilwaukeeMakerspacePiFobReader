@@ -353,6 +353,9 @@ namespace MmsPiFobReader
 								case "cabinet":
 									mode = ReaderMode.Cabinet;
 									break;
+								case "legacycabinet":
+									mode = ReaderMode.LegacyCabinet;
+									break;
 								case "sensor":
 									mode = ReaderMode.Sensor;
 									break;
@@ -371,6 +374,7 @@ namespace MmsPiFobReader
 
 							switch (mode) {
 								case ReaderMode.Cabinet:
+								case ReaderMode.LegacyCabinet:
 									if (!ParseCabinetMenu(settings))
 										continue;
 
@@ -516,7 +520,7 @@ namespace MmsPiFobReader
 			key = keyIn;
 			user = newUser;
 
-			if (mode == ReaderMode.Cabinet | mode == ReaderMode.Modbus) {
+			if (mode == ReaderMode.Cabinet | mode == ReaderMode.LegacyCabinet | mode == ReaderMode.Modbus) {
 				EnterCabinetMenu();
 			}
 			else {
@@ -648,6 +652,11 @@ namespace MmsPiFobReader
 								ReaderHardware.Output(code);
 								Thread.Sleep(1000);
 								ReaderHardware.Output(0);
+							}
+							else if (mode == ReaderMode.LegacyCabinet) {
+								ReaderHardware.LegacyCabinetOutput(code);
+								Thread.Sleep(1000);
+								ReaderHardware.LegacyCabinetOutput(0);
 							}
 							else if (mode == ReaderMode.Modbus) {
 								bool result = false;
