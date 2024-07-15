@@ -198,6 +198,7 @@ namespace MmsPiFobReader
 					gpio.OpenPin(ledPin, PinMode.Output);
 					gpio.OpenPin(beeperPin, PinMode.Output);
 					gpio.OpenPin(transmitEnablePin, PinMode.Output);
+
 					break;
 			}
 
@@ -342,6 +343,14 @@ namespace MmsPiFobReader
 
 					break;
 			}
+		}
+
+		public static void InitializeLegacyCabinetMode()
+		{
+			// All the other pins are reused by the modern cabinet mode.
+			gpio.OpenPin(legacyE3Trigger, PinMode.Output);
+			gpio.OpenPin(legacyE4Trigger, PinMode.Output);
+			gpio.OpenPin(legacyE7Trigger, PinMode.Output);
 		}
 
 		public static void LegacyCabinetOutput(int i)

@@ -374,7 +374,13 @@ namespace MmsPiFobReader
 
 							switch (mode) {
 								case ReaderMode.Cabinet:
+									if (!ParseCabinetMenu(settings))
+										continue;
+
+									break;
 								case ReaderMode.LegacyCabinet:
+									ReaderHardware.InitializeLegacyCabinetMode();
+
 									if (!ParseCabinetMenu(settings))
 										continue;
 
