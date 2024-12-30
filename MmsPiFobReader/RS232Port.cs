@@ -40,12 +40,21 @@ namespace MmsPiFobReader
 			}
 			else {
 				// Parse the read buffer
-				// Detect start/stop bytes from an RS232 reader
+				// Detect start/stop bytes from a 10H RS232 reader
 				if (size > 12 && buffer[cursor] == 0x2 && buffer[cursor + 13] == 0x3) {
 					// Fob id stacked up front
 					// chop off start/stop bytes and CrLf from an RS232 reader
 					output = Encoding.ASCII.GetString(buffer, cursor + 1, 10);
 					cursor += 14;
+
+					return output;
+				}
+				// Detect start/stop bytes from a 12H RS232 reader
+				if (size > 12 && buffer[cursor] == 0x2 && buffer[cursor + 15] == 0x3) {
+					// Fob id stacked up front
+					// chop off start/stop bytes, checksum and CrLf from an RS232 reader
+					output = Encoding.ASCII.GetString(buffer, cursor + 1, 10);
+					cursor += 16;
 
 					return output;
 				}
