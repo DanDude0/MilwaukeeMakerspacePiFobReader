@@ -26,7 +26,7 @@
 		<PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
 		<PackageReference Include="System.Device.Gpio" Version="3.2.0" />
 		<PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
-		<PackageReference Include="System.IO.Ports" Version="9.0.0" />
+		<PackageReference Include="System.IO.Ports" Version="8.0.0" />
 		<PackageReference Include="System.Net.Primitives" Version="4.3.1" />
 		<PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
 		<PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
