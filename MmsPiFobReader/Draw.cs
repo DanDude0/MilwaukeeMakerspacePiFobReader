@@ -21,7 +21,7 @@ namespace MmsPiFobReader
 		private static Font smallerFont = new Font(arial, 42, FontStyle.Regular);
 		private static Font tinyFont = new Font(arial, 31, FontStyle.Regular);
 		private static Font entFont = new Font(arial, 24, FontStyle.Regular);
-		private static Font microFont = new Font(arial, 23, FontStyle.Regular);
+		private static Font microFont = new Font(arial, 21, FontStyle.Regular);
 		private static Color black = Color.FromRgb(0, 0, 0);
 		private static Color white = Color.FromRgb(255, 255, 255);
 		private static Color red = Color.FromRgb(255, 26, 26);

@@ -34,9 +34,9 @@ namespace MmsPiFobReader
 				// Fill into partial buffer if we have data, and room for it
 				ret = serialPort.Read(buffer, end, 128);
 
-				end = end + ret;
+				Console.WriteLine($"Received raw RS232 read [{ret}]: {Convert.ToBase64String(buffer.AsSpan(end, ret))}");
 
-				Console.WriteLine($"Received raw RS232 read [{size}]: {Convert.ToBase64String(buffer.AsSpan(0, size))}");
+				end = end + ret;
 			}
 			else {
 				// Parse the read buffer
