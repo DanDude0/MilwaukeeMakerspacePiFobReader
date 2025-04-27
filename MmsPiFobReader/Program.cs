@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -335,6 +336,11 @@ namespace MmsPiFobReader
 						cabinetItems?.Clear();
 
 						try {
+							// Persist all possible servers
+							status.Server = status.Server.Union(config?.BackupServers).ToArray();
+
+							File.WriteAllLines("server.txt", status.Server);
+
 							if (config?.InvertScreen == true) {
 								ReaderHardware.InvertScreen = true;
 
@@ -756,6 +762,14 @@ namespace MmsPiFobReader
 		static void EnterServiceMenu()
 		{
 			Log.Message("Entering Service Menu");
+
+			try {
+				controller.Action(key, "Entering Service Menu");
+			}
+			catch (Exception) {
+				// Do Nothing
+			}
+
 			UpdateStatus();
 
 			var draw = true;
@@ -764,11 +778,11 @@ namespace MmsPiFobReader
 			while (true) {
 				if (draw) {
 					Draw.MenuOverride = true;
-					Draw.Service($@"Version: {status.Version}
+					Draw.Service($@"Version: {status.Version}     Mode: {status.Controller}
 Uptime: {status.Uptime}
 Hardware: {status.Hardware}
 IP Address: {status.Ip}     Reader Id: {status.Id}
-Server: {status.Server}     Controller: {status.Controller}
+Server: {string.Join(", ", status.Server)}     
 Snapshot: {status.LocalSnapshot}
 
 [1] Set Reader Id	[2] Set Server
@@ -813,6 +827,13 @@ Snapshot: {status.LocalSnapshot}
 							Log.Message("Toggle Trigger - On");
 						}
 
+						try {
+							controller.Action(key, "Service Menu - Toggle Trigger");
+						}
+						catch (Exception) {
+							// Do Nothing
+						}
+
 						break;
 					case '5':
 						Draw.Loading("Updating Software, please wait.");
@@ -846,6 +867,13 @@ Snapshot: {status.LocalSnapshot}
 		static void EnterServiceMenu2()
 		{
 			Log.Message("Entering Service Menu 2nd Page");
+
+			try {
+				controller.Action(key, "Entering Service Menu 2nd Page");
+			}
+			catch (Exception) {
+				// Do Nothing
+			}
 
 			var draw = true;
 
@@ -1046,7 +1074,7 @@ Server: {complete}
 							segments[currentSegment] = "_";
 						}
 						else {
-							status.Server = complete;
+							status.Server = [complete];
 							File.WriteAllText("server.txt", complete);
 							Log.Message($"Set server to: {complete}");
 							return;

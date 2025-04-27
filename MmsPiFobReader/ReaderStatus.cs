@@ -8,7 +8,7 @@ namespace MmsPiFobReader
 		public string Hardware { get; set; }
 		public string Kernel { get; set; }
 		public string Os { get; set; }
-		public string Server { get; set; }
+		public string[] Server { get; set; }
 		public string Controller { get; set; }
 		public string LocalSnapshot { get; set; }
 		public string Uptime { get; set; }

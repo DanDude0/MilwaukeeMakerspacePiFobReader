@@ -308,7 +308,7 @@ namespace MmsPiFobReader
 				)
 				.DrawText(new TextOptions(microFont) {
 					HorizontalAlignment = HorizontalAlignment.Left,
-					WrappingLength = 480 - 20,
+					WrappingLength = -1,
 					VerticalAlignment = VerticalAlignment.Top,
 					Origin = new PointF(10, 7),
 				},

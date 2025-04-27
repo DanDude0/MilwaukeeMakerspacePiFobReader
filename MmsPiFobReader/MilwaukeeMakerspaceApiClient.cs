@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.NetworkInformation;
@@ -21,15 +23,21 @@ namespace MmsPiFobReader
 			status.Ip = GetLocalIp4Address();
 
 			// SSDP Not working? Use override file
-			if (File.Exists("server.txt"))
-				status.Server = File.ReadAllText("server.txt").Replace("\n", "");
-			else
-				SearchForServer();
+			if (File.Exists("server.txt")) {
+				var dirtyServers = File.ReadAllText("server.txt").Split('\n');
+				var cleanServers = new List<string>();
+
+				foreach (var dirtyServer in dirtyServers) {
+					var cleanServer = dirtyServer.Trim();
+
+					if (!string.IsNullOrEmpty(cleanServer) && !cleanServers.Contains(cleanServer))
+						cleanServers.Add(cleanServer);
+				}
+
+				status.Server = cleanServers.ToArray();
+			}
 
 			client = GetClient();
-
-			// Check if server is responding
-			var unused = client.GetStringAsync($"/").Result;
 
 			status.Controller = "Server";
 			status.Warning = "";
@@ -48,7 +56,7 @@ namespace MmsPiFobReader
 
 			result.EnsureSuccessStatusCode();
 
-			return JsonConvert.DeserializeObject<ReaderResult>(result.Content.ReadAsStringAsync().Result) ;
+			return JsonConvert.DeserializeObject<ReaderResult>(result.Content.ReadAsStringAsync().Result);
 		}
 
 		public AuthenticationResult Authenticate(string key)
@@ -127,11 +135,43 @@ namespace MmsPiFobReader
 
 		private HttpClient GetClient()
 		{
-			var client = new HttpClient();
-			client.BaseAddress = new Uri($"http://{status.Server}/");
-			client.Timeout = new TimeSpan(0, 0, 5);
+			var found = false;
 
-			return client;
+			foreach (var server in status.Server) {
+				var cleanServer = server.Trim();
+
+				if (string.IsNullOrEmpty(cleanServer))
+					break;
+
+				var client = new HttpClient();
+				client.BaseAddress = new Uri($"http://{cleanServer}/");
+				client.Timeout = new TimeSpan(0, 0, 5);
+
+				try {
+					// Check if server is responding
+					_ = client.GetStringAsync($"/").Result;
+
+					return client;
+				}
+				catch {
+					// Let it try the next one
+				}
+			}
+
+			if (!found) {
+				SearchForServer();
+
+				var client = new HttpClient();
+				client.BaseAddress = new Uri($"http://{status.Server[0]}/");
+				client.Timeout = new TimeSpan(0, 0, 5);
+
+				// Check if server is responding
+				_ = client.GetStringAsync($"/").Result;
+
+				return client;
+			}
+
+			throw new Exception("Could not find server.");
 		}
 
 		private void SearchForServer()
@@ -156,7 +196,7 @@ namespace MmsPiFobReader
 				deviceLocator.StartListeningForNotifications();
 
 				for (int i = 0; i < 20; i += 1) {
-					if (!string.IsNullOrEmpty(status.Server))
+					if (status.Server?.Length > 0)
 						// We found a server, let the constructor continue
 						return;
 
@@ -174,7 +214,7 @@ namespace MmsPiFobReader
 		private void FoundDevice(object sender, DeviceAvailableEventArgs e)
 		{
 			if (e.DiscoveredDevice.Usn.Contains("6111f321-2cee-455e-b203-4abfaf14b516"))
-				status.Server = e.DiscoveredDevice.DescriptionLocation.Host;
+				status.Server = [e.DiscoveredDevice.DescriptionLocation.Host];
 		}
 
 		private static string GetLocalIp4Address()
