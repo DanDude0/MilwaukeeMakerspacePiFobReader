@@ -137,7 +137,7 @@ namespace MmsPiFobReader
 		{
 			var found = false;
 
-			foreach (var server in status.Server) {
+			foreach (var server in status?.Server) {
 				var cleanServer = server.Trim();
 
 				if (string.IsNullOrEmpty(cleanServer))
