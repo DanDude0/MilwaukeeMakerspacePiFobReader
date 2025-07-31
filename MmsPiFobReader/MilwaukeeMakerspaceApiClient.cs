@@ -138,7 +138,8 @@ namespace MmsPiFobReader
 		{
 			var found = false;
 
-			if (status?.Server != null) {
+			// Seems redundant, but if any of these are null, foreach would throw
+			if (status?.Server?.Length > 0) {
 				foreach (var server in status.Server) {
 					var cleanServer = server.Trim();
 
