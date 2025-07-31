@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -137,24 +138,26 @@ namespace MmsPiFobReader
 		{
 			var found = false;
 
-			foreach (var server in status.Server) {
-				var cleanServer = server.Trim();
+			if (status?.Server != null) {
+				foreach (var server in status.Server) {
+					var cleanServer = server.Trim();
 
-				if (string.IsNullOrEmpty(cleanServer))
-					break;
+					if (string.IsNullOrEmpty(cleanServer))
+						break;
 
-				var client = new HttpClient();
-				client.BaseAddress = new Uri($"http://{cleanServer}/");
-				client.Timeout = new TimeSpan(0, 0, 5);
+					var client = new HttpClient();
+					client.BaseAddress = new Uri($"http://{cleanServer}/");
+					client.Timeout = new TimeSpan(0, 0, 5);
 
-				try {
-					// Check if server is responding
-					_ = client.GetStringAsync($"/").Result;
+					try {
+						// Check if server is responding
+						_ = client.GetStringAsync($"/").Result;
 
-					return client;
-				}
-				catch {
-					// Let it try the next one
+						return client;
+					}
+					catch {
+						// Let it try the next one
+					}
 				}
 			}
 
