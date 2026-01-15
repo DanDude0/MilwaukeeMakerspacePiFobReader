@@ -12,14 +12,14 @@ Get the installer here:
 Be sure to select the `.Net Core cross-platform development` workload.
 
 #### Alternate - Just install the necessary SDKs
-Get the installer for the .Net Core 3.1 SDK here:
+Get the installer for the .Net Core 8 SDK here:
 
-<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-3.1.100-windows-x64-installer>
+<https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.417-windows-x64-installer>
 
 ### Mac
-Get the installer for the .Net Core 3.1 SDK here:
+Get the installer for the .Net Core 8 SDK here:
 
-<https://www.microsoft.com/net/download/thank-you/dotnet-sdk-3.1.100-macos-x64-installer>
+<https://dotnet.microsoft.com/en-us/download/dotnet/thank-you/sdk-8.0.417-macos-x64-installer>
 
 Install the SDL2 library:
 	
@@ -28,21 +28,18 @@ Install the SDL2 library:
 ### Linux
 Instructions good for anything Debian/Ubuntu based. Translating for other package managers of your choice should be trivial:
 
-Install .Net Core 3.1 SDK:
+Install .Net Core 8 SDK:
 
 Directions from here:
 
-<https://www.microsoft.com/net/download/linux-package-manager/debian9/sdk-current>
+<https://learn.microsoft.com/en-us/dotnet/core/install/linux-debian?tabs=dotnet10>
 
-	wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.asc.gpg
-	mv microsoft.asc.gpg /etc/apt/trusted.gpg.d/
-	wget -q https://packages.microsoft.com/config/debian/9/prod.list
-	mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
-	chown root:root /etc/apt/trusted.gpg.d/microsoft.asc.gpg
-	chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+	wget https://packages.microsoft.com/config/debian/13/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+	sudo dpkg -i packages-microsoft-prod.deb
+	rm packages-microsoft-prod.deb
 
 	apt-get update
-	apt-get install dotnet-sdk-3.1
+	apt-get install dotnet-sdk-8.0
 
 Install the SDL2 library:
 	
@@ -84,7 +81,7 @@ Now lets try again:
 	
 If it loaded correctly, you are ready to test and develop! Otherwise proceed:
 
-"You stupid fuck, it's still broken!"  - You probably see this error:
+"You stupid fuck Dan, it's still broken!"  - You probably see this error:
 
 	! ERROR !
 	Cannot reach
@@ -201,7 +198,7 @@ Default user/password should be:
 	
 Download and run the install script:
 
-	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installRPi.sh
+	wget -N https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installRPi.sh
 	chmod +x installRPi.sh
 	sudo ./installRPi.sh
 	
@@ -253,7 +250,7 @@ Connect to your wifi network:
 
 Download and run the install script:
 
-	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh
+	wget -N https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/installOPi.sh
 	chmod +x installOPi.sh
 	sudo ./installOPi.sh
 	
@@ -261,13 +258,15 @@ Follow the directions on screen. This install can take a LONG time, probably ove
 
 If everything went to plan, you just need to reboot the Pi and the reader will start working on bootup.
 	
-## Upgrade an existing install
+## Upgrade/Repair an existing install
 
 Run this command, it will do an inplace upgrade and reboot the reader automatically
 
-	wget https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/upgrade.sh
+	wget -N https://raw.githubusercontent.com/DanDude0/MilwaukeeMakerspacePiFobReader/master/upgrade.sh
 	chmod +x upgrade.sh
 	sudo ./upgrade.sh
+	
+If you experince a corrupted SD card, you can also try running the installer script over again on an existing image, it is idempotent, will not break anything, just fix it.
 
 ### Assembly
 
